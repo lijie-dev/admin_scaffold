@@ -9,6 +9,8 @@ defmodule AdminScaffold.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    many_to_many :roles, AdminScaffold.Accounts.Role, join_through: "user_roles"
+
     timestamps(type: :utc_datetime)
   end
 

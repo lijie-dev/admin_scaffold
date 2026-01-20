@@ -1,0 +1,31 @@
+# BMAD Configuration for BmadElixir
+project:
+  name: BmadElixir
+  type: elixir_phoenix
+  version: 0.1.0
+
+agents:
+  default: elixir-dev
+  available:
+    - elixir-architect
+    - elixir-dev
+    - elixir-qa
+    - elixir-sm
+    - phoenix-expert
+    - ecto-specialist
+
+workflows:
+  default: greenfield-phoenix
+
+quality:
+  pre_commit:
+    - mix format --check-formatted
+    - mix credo --strict
+    - mix dialyzer
+    - mix test
+
+stories:
+  template: story-tmpl.yaml
+  backlog_dir: stories/backlog
+  in_progress_dir: stories/in-progress
+  completed_dir: stories/completed

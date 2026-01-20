@@ -56,6 +56,16 @@ defmodule AdminScaffoldWeb.Router do
       live "/admin/users/:id", UserLive.Show, :show
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      # 角色管理
+      live "/admin/roles", RoleLive.Index, :index
+      live "/admin/roles/new", RoleLive.Index, :new
+      live "/admin/roles/:id/edit", RoleLive.Index, :edit
+
+      # 权限管理
+      live "/admin/permissions", PermissionLive.Index, :index
+      live "/admin/permissions/new", PermissionLive.Index, :new
+      live "/admin/permissions/:id/edit", PermissionLive.Index, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password

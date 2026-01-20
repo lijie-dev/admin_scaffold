@@ -1,0 +1,186 @@
+# Elixir/Phoenix 项目用户故事模板
+# 复制此模板在 stories/ 目录中创建新故事
+# 示例: stories/STORY-001.yaml
+
+story:
+  id: STORY-###
+  title: "[简短的描述性标题]"
+  status: ready_for_dev  # ready_for_dev（准备开发）, in_progress（进行中）, in_review（审查中）, completed（已完成）, blocked（已阻止）
+  type: feature  # feature（功能）, bug（缺陷）, chore（杂务）, spike（技术探索）
+  priority: medium  # high（高）, medium（中）, low（低）
+  size: M  # XS（<2小时）, S（2-4小时）, M（4-8小时）, L（1-2天）, XL（2+天 - 应该拆分！）
+  assigned_agent: elixir-dev  # elixir-dev（开发）, elixir-qa（测试）, elixir-architect（架构师）, elixir-sm（产品经理）
+  created_date: 2024-01-15
+  updated_date: 2024-01-15
+
+user_story: |
+  作为一个 [角色/用户]
+  我想要 [操作/功能]
+  以便 [业务价值/收益]
+
+  示例:
+  作为一个客户
+  我想要搜索可用的预约时间段
+  以便我可以在方便的时间预约
+
+acceptance_criteria:
+  - scenario: "基本搜索功能"
+    given: "我在预约页面上"
+    when: "我搜索特定日期的时间段"
+    then:
+      - "我看到该日期的所有可用时间段"
+      - "时间段按时间排序"
+      - "已满的时间段不显示"
+
+  - scenario: "空状态"
+    given: "所选日期没有可用的时间段"
+    when: "我搜索一个日期"
+    then:
+      - "我看到消息'此日期没有可用的预约'"
+      - "我看到查看下一个可用日期的链接"
+
+  - scenario: "时间段预留"
+    given: "我选择一个时间段"
+    when: "我点击'预约预约'"
+    then:
+      - "时间段被预留10分钟"
+      - "我被重定向到预约表单"
+
+technical_tasks:
+  context:
+    - "创建 Appointments.list_available_slots/2 函数"
+    - "添加具有适当索引的数据库查询以进行日期查找"
+    - "实现具有 TTL 过期的时间段预留逻辑"
+    - "编写全面的上下文测试（成功路径 + 错误）"
+
+  liveview:
+    - "创建 AppointmentLive.Search LiveView 模块"
+    - "实现带有时间段流的挂载"
+    - "添加带有过滤器的搜索事件处理程序"
+    - "使用 phx-update='stream' 为时间段构建模板"
+    - "添加空状态处理"
+    - "编写 LiveView 测试（挂载、搜索、预留）"
+
+  real_time:
+    - "连接时订阅 'appointments:slots' PubSub 主题"
+    - "在预约/取消时广播时间段更新"
+    - "为实时时间段可用性更新添加 handle_info"
+    - "测试多个用户之间的并发预约"
+
+  performance:
+    - "在 (location_id, date) 上添加数据库索引以进行快速查找"
+    - "为热门位置/日期实现缓存"
+    - "在搜索输入上添加 phx-debounce='300'"
+    - "在测试期间监控 N+1 查询"
+
+dependencies:
+  - story_id: STORY-120
+    description: "预约架构必须存在位置/日期字段"
+    status: completed
+
+  - migration: "20240115_add_slot_reservation_tracking"
+    description: "向预约表添加 reserved_until:datetime"
+
+  - external: "ElevenLabs API 集成用于语音确认"
+    status: optional
+
+non_functional_requirements:
+  performance:
+    - "搜索查询在 < 100ms 内完成，最多 10,000 个预约"
+    - "支持 100 个并发用户同时搜索"
+    - "缓存热门位置/日期组合 5 分钟"
+
+  security:
+    - "用户只能看到其允许位置的时间段（租户隔离）"
+    - "验证所有日期输入以防止注入攻击"
+    - "限制搜索速率为每个用户每分钟 10 个请求"
+
+  scalability:
+    - "分页，每页 50 个时间段"
+    - "在 LiveView 中使用流以避免内存膨胀"
+
+  observability:
+    - "记录所有带有过滤器的搜索查询以进行分析"
+    - "跟踪时间段预留过期指标"
+    - "如果搜索响应时间 > 500ms 则发出警报"
+
+edge_cases:
+  - "当用户的预留在预约期间过期时会发生什么？"
+  - "如何处理预约的时区差异？"
+  - "如果在显示时间段时删除位置会怎样？"
+  - "处理多个用户对同一时间段的并发预约"
+
+testing_strategy:
+  unit_tests:
+    - "上下文函数（list_available_slots、reserve_slot、release_slot）"
+    - "变更集验证（日期范围、冲突）"
+    - "边界情况（过期的预留、并发预约）"
+
+  integration_tests:
+    - "使用填充的时间段挂载 LiveView"
+    - "使用各种过滤器搜索（日期、位置、提供者）"
+    - "当另一个用户预约时间段时的实时更新"
+    - "预留时的乐观 UI 更新"
+
+  performance_tests:
+    - "使用 1000 个并发时间段搜索进行负载测试"
+    - "使用 100k 预约记录测量查询性能"
+
+notes:
+  - "时间段应通过 LiveView 每 30 秒自动刷新一次"
+  - "考虑为预留的时间段添加倒计时计时器"
+  - "未来增强：为每个用户添加时间段偏好持久化"
+  - "加载提供者/位置关联时监控 N+1 查询"
+
+checklists:
+  before_starting:
+    - "[ ] 依赖项已验证（STORY-120 已完成）"
+    - "[ ] 设计已与架构师审查"
+    - "[ ] 数据库架构已设计"
+    - "[ ] PubSub 主题已规划"
+
+  during_development:
+    - "[ ] 遵循 Phoenix 检查清单（priv/checklists/phoenix-checklist.md）"
+    - "[ ] 遵循 Ecto 检查清单（priv/checklists/ecto-checklist.md）"
+    - "[ ] 遵循 LiveView 检查清单（priv/checklists/liveview-checklist.md）"
+    - "[ ] 在实现前编写测试（TDD）"
+    - "[ ] 频繁运行 mix test"
+
+  before_completing:
+    - "[ ] 所有验收标准已满足"
+    - "[ ] 所有测试通过（mix test）"
+    - "[ ] 没有 Credo 警告（mix credo --strict）"
+    - "[ ] 没有 Dialyzer 警告（mix dialyzer）"
+    - "[ ] 代码已格式化（mix format）"
+    - "[ ] 文档完整（公共函数上的 @doc）"
+    - "[ ] 性能已测试（无 N+1 查询）"
+    - "[ ] 安全审查已完成"
+    - "[ ] 边界情况已处理"
+    - "[ ] 实时更新正常工作"
+
+qa_validation:
+  test_scenarios:
+    - "搜索各种日期和位置的时间段"
+    - "预约一个时间段并验证预留超时是否有效"
+    - "打开多个浏览器标签页并验证实时同步"
+    - "使用慢速网络进行测试（phx-disable-with 显示）"
+    - "测试空状态（没有可用的时间段）"
+    - "测试错误状态（网络故障、无效日期）"
+
+  performance_criteria:
+    - "搜索在 < 100ms 内响应"
+    - "页面在 < 1 秒内加载 100 个时间段"
+    - "100 次搜索后没有内存泄漏"
+    - "实时更新在 1 秒内出现"
+
+definition_of_done:
+  - "[ ] 所有验收标准已满足并测试"
+  - "[ ] 所有技术任务已完成"
+  - "[ ] 代码已审查并批准"
+  - "[ ] 所有测试通过（100% 通过率）"
+  - "[ ] 质量门已通过（credo、dialyzer、format）"
+  - "[ ] 文档完整"
+  - "[ ] 已部署到暂存环境并验证"
+  - "[ ] 性能可接受"
+  - "[ ] 安全已审查"
+  - "[ ] 已获得产品所有者的接受"

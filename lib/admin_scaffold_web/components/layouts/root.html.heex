@@ -11,27 +11,58 @@
     <link phx-track-static rel="stylesheet" href={~p"/assets/default.css"} />
     <script phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}></script>
   </head>
-  <body class="bg-white antialiased">
-    <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-      <%= if @current_scope do %>
-        <li>
-          {@current_scope.user.email}
-        </li>
-        <li>
-          <.link href={~p"/users/settings"}>Settings</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-out"} method="delete">Log out</.link>
-        </li>
-      <% else %>
-        <li>
-          <.link href={~p"/users/register"}>Register</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-in"}>Log in</.link>
-        </li>
-      <% end %>
-    </ul>
-    {@inner_content}
+  <body class="bg-gray-100 antialiased">
+    <%= if @current_scope do %>
+      <div class="min-h-screen flex">
+        <!-- 侧边栏 -->
+        <div class="w-64 bg-gray-800 text-white flex flex-col">
+          <div class="p-4 text-xl font-bold border-b border-gray-700">
+            后台管理系统
+          </div>
+          <nav class="flex-1 p-4 space-y-2">
+            <.link navigate={~p"/dashboard"} class="block px-4 py-2 rounded hover:bg-gray-700">
+              仪表板
+            </.link>
+            <.link navigate={~p"/admin/users"} class="block px-4 py-2 rounded hover:bg-gray-700">
+              用户管理
+            </.link>
+            <.link navigate={~p"/admin/roles"} class="block px-4 py-2 rounded hover:bg-gray-700">
+              角色管理
+            </.link>
+            <.link navigate={~p"/admin/permissions"} class="block px-4 py-2 rounded hover:bg-gray-700">
+              权限管理
+            </.link>
+          </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col">
+          <!-- 顶部导航栏 -->
+          <header class="bg-white shadow">
+            <div class="flex items-center justify-between px-6 py-4">
+              <h2 class="text-xl font-semibold text-gray-800">{assigns[:page_title] || "管理后台"}</h2>
+              <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600">{@current_scope.user.email}</span>
+                <.link href={~p"/users/settings"} class="text-sm text-indigo-600 hover:text-indigo-800">
+                  设置
+                </.link>
+                <.link href={~p"/users/log-out"} method="delete" class="text-sm text-red-600 hover:text-red-800">
+                  退出
+                </.link>
+              </div>
+            </div>
+          </header>
+
+          <!-- 页面内容 -->
+          <main class="flex-1 overflow-y-auto">
+            {@inner_content}
+          </main>
+        </div>
+      </div>
+    <% else %>
+      <div class="min-h-screen flex items-center justify-center">
+        {@inner_content}
+      </div>
+    <% end %>
   </body>
 </html>

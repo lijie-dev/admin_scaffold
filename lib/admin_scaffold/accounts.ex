@@ -6,7 +6,7 @@ defmodule AdminScaffold.Accounts do
   import Ecto.Query, warn: false
   alias AdminScaffold.Repo
 
-  alias AdminScaffold.Accounts.{User, UserToken, UserNotifier}
+  alias AdminScaffold.Accounts.{User, UserToken, UserNotifier, Role, Permission, Menu}
 
   ## Database getters
 
@@ -332,5 +332,143 @@ defmodule AdminScaffold.Accounts do
         {:ok, {user, tokens_to_expire}}
       end
     end)
+  end
+
+  ## Role functions
+
+  @doc """
+  Returns the list of roles.
+  """
+  def list_roles do
+    Repo.all(Role)
+  end
+
+  @doc """
+  Gets a single role.
+  """
+  def get_role!(id), do: Repo.get!(Role, id)
+
+  @doc """
+  Creates a role.
+  """
+  def create_role(attrs \\ %{}) do
+    %Role{}
+    |> Role.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a role.
+  """
+  def update_role(%Role{} = role, attrs) do
+    role
+    |> Role.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a role.
+  """
+  def delete_role(%Role{} = role) do
+    Repo.delete(role)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking role changes.
+  """
+  def change_role(%Role{} = role, attrs \\ %{}) do
+    Role.changeset(role, attrs)
+  end
+
+  ## Permission functions
+
+  @doc """
+  Returns the list of permissions.
+  """
+  def list_permissions do
+    Repo.all(Permission)
+  end
+
+  @doc """
+  Gets a single permission.
+  """
+  def get_permission!(id), do: Repo.get!(Permission, id)
+
+  @doc """
+  Creates a permission.
+  """
+  def create_permission(attrs \\ %{}) do
+    %Permission{}
+    |> Permission.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a permission.
+  """
+  def update_permission(%Permission{} = permission, attrs) do
+    permission
+    |> Permission.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a permission.
+  """
+  def delete_permission(%Permission{} = permission) do
+    Repo.delete(permission)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking permission changes.
+  """
+  def change_permission(%Permission{} = permission, attrs \\ %{}) do
+    Permission.changeset(permission, attrs)
+  end
+
+  ## Menu functions
+
+  @doc """
+  Returns the list of menus.
+  """
+  def list_menus do
+    Repo.all(from m in Menu, order_by: [asc: m.sort])
+  end
+
+  @doc """
+  Gets a single menu.
+  """
+  def get_menu!(id), do: Repo.get!(Menu, id)
+
+  @doc """
+  Creates a menu.
+  """
+  def create_menu(attrs \\ %{}) do
+    %Menu{}
+    |> Menu.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a menu.
+  """
+  def update_menu(%Menu{} = menu, attrs) do
+    menu
+    |> Menu.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a menu.
+  """
+  def delete_menu(%Menu{} = menu) do
+    Repo.delete(menu)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking menu changes.
+  """
+  def change_menu(%Menu{} = menu, attrs \\ %{}) do
+    Menu.changeset(menu, attrs)
   end
 end

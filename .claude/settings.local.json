@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git remote:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(mix phx.gen.schema:*)",
+      "Bash(mix ecto.gen.migration:*)",
+      "Bash(mix ecto.migrate:*)",
+      "Bash(mix compile:*)",
+      "Bash(mix phx.server:*)"
     ]
   }
 }

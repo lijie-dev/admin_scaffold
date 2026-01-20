@@ -1,0 +1,170 @@
+# BMAD 工作流：全新 Phoenix 应用
+# 在从零开始启动全新 Phoenix 项目时使用此工作流
+
+name: 全新 Phoenix 应用
+description: 从构思到部署构建新 Phoenix 应用的完整工作流
+type: greenfield
+framework: phoenix
+agents_involved:
+  - elixir-architect
+  - elixir-sm
+  - elixir-dev
+  - elixir-qa
+
+phases:
+  - name: 规划与架构
+    agent: elixir-architect
+    duration: 1-2 days
+    steps:
+      - 审查需求并定义有界上下文
+      - 设计数据库模式和关系
+      - 规划有状态进程的监督树
+      - 定义多租户策略（如适用）
+      - 记录架构决策
+    deliverables:
+      - 架构文档
+      - 数据库 ERD
+      - 监督树图
+      - 已定义的上下文边界
+
+  - name: 项目设置
+    agent: elixir-dev
+    duration: 0.5 days
+    steps:
+      - 创建新 Phoenix 项目："mix phx.new my_app"
+      - 设置 git 仓库
+      - 配置开发环境
+      - 添加必要的依赖（credo、dialyzer 等）
+      - 初始化 BMAD："mix bmad.init --hooks"
+      - 在 config/dev.exs 中配置数据库
+      - 运行 "mix ecto.create" 创建数据库
+    deliverables:
+      - 可工作的 Phoenix 骨架
+      - 已初始化的 git 仓库
+      - 已部署的 BMAD 结构
+      - 已创建的数据库
+
+  - name: 核心基础设施
+    agent: elixir-dev
+    duration: 1-2 days
+    steps:
+      - 设置身份验证（如需要）
+      - 配置错误跟踪（如使用外部服务）
+      - 添加健康检查端点
+      - 设置基本布局和组件
+      - 配置邮件程序（如需要）
+      - 添加核心工具函数和辅助函数
+    deliverables:
+      - 身份验证正常工作
+      - 基本 UI 组件
+      - 监控已部署
+
+  - name: 功能开发周期
+    agent: elixir-sm
+    iterative: true
+    steps:
+      - SM 为下一个功能创建故事
+      - 架构师审查是否需要架构更改
+      - 开发者按照故事任务进行实现
+      - QA 验证实现
+      - 对每个功能重复此过程
+    notes: |
+      这是主要 BMAD 周期运行的地方：
+      1. SM 在 stories/backlog/ 中创建故事
+      2. 开发者移动到 stories/in-progress/
+      3. 开发者实现，更新故事进度
+      4. QA 验证，提供反馈
+      5. 故事移动到 stories/completed/
+
+  - name: 质量门
+    agent: elixir-qa
+    continuous: true
+    checks:
+      - 所有测试通过 (mix test)
+      - 代码质量 (mix credo --strict)
+      - 类型检查 (mix dialyzer)
+      - 代码格式化 (mix format)
+      - 安全审计 (mix deps.audit)
+      - 文档覆盖率
+    notes: Pre-commit 钩子自动强制执行这些检查
+
+  - name: 部署前准备
+    agent: elixir-qa
+    duration: 1 day
+    steps:
+      - 运行完整测试套件并生成覆盖率报告
+      - 性能测试
+      - 安全审计
+      - 可访问性测试（如有 web UI）
+      - 跨浏览器测试（如有 web UI）
+      - 负载测试（如预期高流量）
+    deliverables:
+      - 测试覆盖率报告
+      - 性能基准
+      - 安全审计结果
+
+  - name: 部署准备
+    agent: elixir-dev
+    duration: 0.5-1 day
+    steps:
+      - 配置生产环境密钥
+      - 设置发布配置
+      - 数据库迁移策略
+      - 配置监控和日志
+      - 准备部署文档
+    deliverables:
+      - 生产就绪的发布版本
+      - 部署运行手册
+      - 回滚程序
+
+key_patterns:
+  authentication:
+    - 使用 pow 或 phx.gen.auth 进行标准身份验证
+    - 使用 Accounts 上下文实现
+    - 使用 bcrypt 进行密码哈希
+    - Web 使用基于会话的身份验证，API 使用基于令牌的身份验证
+
+  contexts:
+    - 每个有界域一个上下文
+    - 仅公共 API 函数
+    - 内部函数为私有
+    - 仅通过公共 API 进行测试
+
+  liveview:
+    - 用于交互式、实时功能
+    - 保持 socket assigns 最小化
+    - 对大型集合使用 streams
+    - 实现乐观 UI 更新
+
+  testing:
+    - 上下文的单元测试
+    - 端点的控制器测试
+    - 交互式功能的 LiveView 测试
+    - 关键流程的集成测试
+
+quality_checklist:
+  - 所有上下文都有全面的测试
+  - LiveViews 处理所有边界情况
+  - 错误页面对用户友好
+  - API 端点已验证和记录
+  - 数据库有适当的索引
+  - 迁移是可逆的
+  - 没有 N+1 查询
+  - 适当的授权检查
+
+common_pitfalls:
+  - 跳过上下文设计（导致代码混乱）
+  - 控制器过于庞大（将逻辑移到上下文）
+  - GenServers 缺少监督
+  - 不测试边界情况
+  - 忘记数据库索引
+  - 暴露内部实现细节
+
+success_criteria:
+  - 所有测试通过 (100%)
+  - Credo 质量检查通过
+  - Dialyzer 类型检查通过
+  - 文档完整
+  - 性能基准达到
+  - 安全审计通过
+  - 部署成功

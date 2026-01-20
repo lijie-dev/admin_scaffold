@@ -1,0 +1,78 @@
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="py-8">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-3xl font-bold text-gray-900">权限管理</h1>
+        <p class="mt-2 text-sm text-gray-700">管理系统权限</p>
+      </div>
+      <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <.link
+          patch={~p"/admin/permissions/new"}
+          class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+        >
+          新建权限
+        </.link>
+      </div>
+    </div>
+
+    <div class="mt-8 flow-root">
+      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+          <table class="min-w-full divide-y divide-gray-300">
+            <thead>
+              <tr>
+                <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">ID</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">权限名称</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">标识</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">描述</th>
+                <th class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                  <span class="sr-only">操作</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="permissions" phx-update="stream" class="divide-y divide-gray-200">
+              <tr :for={{dom_id, permission} <- @streams.permissions} id={dom_id}>
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900"><%= permission.id %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900"><%= permission.name %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= permission.slug %></td>
+                <td class="px-3 py-4 text-sm text-gray-500"><%= permission.description %></td>
+                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                  <.link patch={~p"/admin/permissions/#{permission}/edit"} class="text-indigo-600 hover:text-indigo-900 mr-4">
+                    编辑
+                  </.link>
+                  <.link
+                    phx-click={JS.push("delete", value: %{id: permission.id})}
+                    data-confirm="确定要删除这个权限吗？"
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    删除
+                  </.link>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  :if={@live_action in [:new, :edit]}
+  class="fixed inset-0 z-50 overflow-y-auto"
+  phx-remove={JS.hide(transition: "fade-out")}
+>
+  <div class="flex items-center justify-center min-h-screen px-4">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75" phx-click={JS.patch(~p"/admin/permissions")}></div>
+    <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+      <.live_component
+        module={AdminScaffoldWeb.PermissionLive.FormComponent}
+        id={@permission.id || :new}
+        title={@page_title}
+        action={@live_action}
+        permission={@permission}
+        patch={~p"/admin/permissions"}
+      />
+    </div>
+  </div>
+</div>

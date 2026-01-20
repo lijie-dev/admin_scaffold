@@ -1,0 +1,349 @@
+# BMAD 工作流：添加 LiveView 功能
+# 在使用 LiveView 添加交互式、实时功能时使用此工作流
+
+name: 添加 LiveView 功能
+description: 实现 LiveView 驱动的交互式功能的完整工作流
+type: feature
+framework: phoenix_liveview
+complexity: medium-high
+agents_involved:
+  - elixir-dev
+  - elixir-qa
+
+prerequisites:
+  - Phoenix LiveView 已安装并配置
+  - 数据的 Context 和 Schema 已存在
+  - 理解 LiveView 生命周期（mount、handle_event、handle_info）
+
+steps:
+  - name: 规划 LiveView 结构
+    agent: elixir-dev
+    duration: 30分钟 - 1小时
+    questions:
+      - 需要在 socket assigns 中跟踪哪些状态？
+      - 哪些用户交互会触发事件？
+      - 是否需要 PubSub 进行实时更新？
+      - 哪些数据需要预加载，哪些需要延迟加载？
+      - 是否会使用表单？（使用 to_form/1）
+    deliverable: LiveView 结构大纲
+
+  - name: 生成 LiveView
+    agent: elixir-dev
+    duration: 15-30分钟
+    commands:
+      - "mix phx.gen.live ContextName SchemaName table_name field:type ..."
+      - 示例："mix phx.gen.live Catalog Product products name:string price:decimal"
+    notes: |
+      这会生成：
+      - lib/my_app_web/live/product_live/index.ex
+      - lib/my_app_web/live/product_live/show.ex
+      - lib/my_app_web/live/product_live/form_component.ex
+      - test/my_app_web/live/product_live_test.exs
+      - 向 router.ex 添加路由
+
+  - name: 实现 Mount
+    agent: elixir-dev
+    duration: 30分钟 - 1小时
+    tasks:
+      - 加载初始数据
+      - 设置 socket assigns
+      - 如需要，订阅 PubSub 主题
+      - 处理已连接与未连接状态
+    patterns:
+      basic_mount: |
+        def mount(_params, _session, socket) do
+          {:ok, assign(socket, :products, list_products())}
+        end
+
+      with_pubsub: |
+        def mount(_params, _session, socket) do
+          if connected?(socket) do
+            Phoenix.PubSub.subscribe(MyApp.PubSub, "products")
+          end
+
+          {:ok, assign(socket, :products, list_products())}
+        end
+
+      with_streams: |
+        def mount(_params, _session, socket) do
+          {:ok,
+           socket
+           |> stream(:products, Catalog.list_products())
+           |> assign(:products_empty?, false)}
+        end
+
+  - name: 实现事件处理器
+    agent: elixir-dev
+    duration: 1-2小时
+    event_types:
+      button_clicks:
+        - 删除按钮
+        - 保存按钮
+        - 自定义操作
+      form_submissions:
+        - 创建新项目
+        - 更新现有项目
+        - 多步骤表单
+      form_changes:
+        - 实时验证
+        - 依赖字段更新
+        - 搜索/过滤输入
+    patterns:
+      simple_event: |
+        def handle_event("delete", %{"id" => id}, socket) do
+          product = Catalog.get_product!(id)
+          {:ok, _} = Catalog.delete_product(product)
+
+          {:noreply, stream_delete(socket, :products, product)}
+        end
+
+      form_validation: |
+        def handle_event("validate", %{"product" => params}, socket) do
+          changeset =
+            socket.assigns.product
+            |> Catalog.change_product(params)
+            |> Map.put(:action, :validate)
+
+          {:noreply, assign(socket, :form, to_form(changeset))}
+        end
+
+      form_submission: |
+        def handle_event("save", %{"product" => params}, socket) do
+          case Catalog.create_product(params) do
+            {:ok, product} ->
+              {:noreply,
+               socket
+               |> put_flash(:info, "产品已创建")
+               |> stream_insert(:products, product, at: 0)}
+
+            {:error, %Ecto.Changeset{} = changeset} ->
+              {:noreply, assign(socket, :form, to_form(changeset))}
+          end
+        end
+
+  - name: 实现 PubSub 处理器（如需要）
+    agent: elixir-dev
+    duration: 30分钟 - 1小时
+    tasks:
+      - 处理 product_created 消息
+      - 处理 product_updated 消息
+      - 处理 product_deleted 消息
+      - 乐观更新 UI
+    pattern: |
+      def handle_info({:product_created, product}, socket) do
+        {:noreply, stream_insert(socket, :products, product, at: 0)}
+      end
+
+      def handle_info({:product_updated, product}, socket) do
+        {:noreply, stream_insert(socket, :products, product)}
+      end
+
+      def handle_info({:product_deleted, product}, socket) do
+        {:noreply, stream_delete(socket, :products, product)}
+      end
+
+  - name: 构建模板
+    agent: elixir-dev
+    duration: 1-3小时
+    tasks:
+      - 创建主模板结构
+      - 使用 to_form/1 添加表单
+      - 实现条件渲染
+      - 添加加载状态
+      - 处理空状态
+      - 添加错误显示
+    patterns:
+      streams_with_empty: |
+        <div id="products" phx-update="stream">
+          <div class="hidden only:block">
+            还没有产品。点击"新建产品"添加一个。
+          </div>
+          <div :for={{id, product} <- @streams.products} id={id}>
+            {product.name} - ${product.price}
+            <button phx-click="delete" phx-value-id={product.id}>
+              删除
+            </button>
+          </div>
+        </div>
+
+      form_with_validation: |
+        <.form
+          for={@form}
+          id="product-form"
+          phx-change="validate"
+          phx-submit="save"
+        >
+          <.input field={@form[:name]} label="名称" />
+          <.input field={@form[:price]} label="价格" type="number" step="0.01" />
+          <.button>保存</.button>
+        </.form>
+
+  - name: 添加 LiveView 测试
+    agent: elixir-dev
+    duration: 2-3小时
+    test_categories:
+      mount_tests:
+        - 测试初始渲染
+        - 测试加载的数据
+        - 测试空状态
+      event_tests:
+        - 测试表单提交
+        - 测试验证
+        - 测试按钮点击
+        - 测试删除操作
+      integration_tests:
+        - 测试完整创建流程
+        - 测试完整更新流程
+        - 测试错误处理
+    patterns:
+      mount_test: |
+        test "显示产品", %{conn: conn} do
+          product = product_fixture()
+          {:ok, _lv, html} = live(conn, ~p"/products")
+
+          assert html =~ "产品"
+          assert html =~ product.name
+        end
+
+      event_test: |
+        test "删除产品", %{conn: conn} do
+          product = product_fixture()
+          {:ok, lv, _html} = live(conn, ~p"/products")
+
+          assert lv
+                 |> element("#products-#{product.id} button", "删除")
+                 |> render_click()
+
+          refute has_element?(lv, "#products-#{product.id}")
+        end
+
+      form_test: |
+        test "保存新产品", %{conn: conn} do
+          {:ok, lv, _html} = live(conn, ~p"/products/new")
+
+          assert lv
+                 |> form("#product-form", product: %{name: "测试", price: "9.99"})
+                 |> render_submit()
+
+          assert_patch(lv, ~p"/products")
+          html = render(lv)
+          assert html =~ "测试"
+        end
+
+  - name: 优化性能
+    agent: elixir-dev
+    duration: 30分钟 - 1小时
+    optimizations:
+      - 对大型集合使用 streams（不是 assigns）
+      - 为巨大数据集实现分页
+      - 为搜索输入添加防抖
+      - 最小化 socket assigns
+      - 对一次性数据使用临时 assigns
+      - 实现乐观 UI 更新
+    patterns:
+      temporary_assigns: |
+        def mount(_params, _session, socket) do
+          {:ok,
+           socket
+           |> assign(:page_title, "产品")
+           |> stream(:products, list_products())
+           |> assign_once_on_mount()}
+        end
+
+        defp assign_once_on_mount(socket) do
+          socket
+          |> assign(:filter_options, get_filter_options())
+          |> assign(:sort_options, ["name", "price", "created_at"])
+        end
+
+      debounced_search: |
+        <.input
+          field={@form[:search]}
+          type="search"
+          phx-debounce="300"
+          placeholder="搜索产品..."
+        />
+
+  - name: 质量验证
+    agent: elixir-qa
+    duration: 1-2小时
+    checks:
+      - 所有 LiveView 测试通过
+      - 测试所有事件处理器
+      - 测试表单验证
+      - 测试错误情况
+      - 测试并发用户（如适用）
+      - 测试浏览器前进/后退导航
+      - 测试实时更新工作
+    success_criteria:
+      - 没有竞态条件
+      - UI 正确更新
+      - 表单正确验证
+      - 错误消息清晰
+      - 显示加载状态
+
+checklist:
+  planning:
+    - [ ] Socket assigns 已识别
+    - [ ] 事件已映射
+    - [ ] PubSub 需求已确定
+    - [ ] 性能考虑已审查
+
+  implementation:
+    - [ ] Mount 函数完成
+    - [ ] 所有事件处理器已实现
+    - [ ] PubSub 处理器工作正常（如需要）
+    - [ ] 模板正确渲染
+    - [ ] 表单使用 to_form/1
+    - [ ] 集合使用 streams
+
+  testing:
+    - [ ] Mount 测试通过
+    - [ ] 事件测试全面
+    - [ ] 表单提交已测试
+    - [ ] 错误情况已覆盖
+    - [ ] 实时更新已测试
+
+  performance:
+    - [ ] 大型列表使用 streams
+    - [ ] 最小化 socket assigns
+    - [ ] 搜索防抖
+    - [ ] 适当的乐观 UI
+
+  ux:
+    - [ ] 显示加载状态
+    - [ ] 处理空状态
+    - [ ] 错误消息清晰
+    - [ ] 提供成功反馈
+
+liveview_best_practices:
+  socket_assigns:
+    - 保持最小化 - 仅包含渲染所需的内容
+    - 对集合使用 streams
+    - 避免存储大型数据结构
+
+  events:
+    - 描述性命名（"save"、"delete"，不是"click"）
+    - 使用 phx-value-* 传递事件数据
+    - 为更新返回 {:noreply, socket}
+
+  forms:
+    - 始终使用 to_form/1
+    - 为验证实现 phx-change
+    - 内联显示错误
+    - 处理期间禁用提交
+
+  real_time:
+    - 仅在 connected?(socket) 时在 mount 中订阅
+    - 断开连接时自动取消订阅
+    - 使用 PubSub 进行跨 LiveView 更新
+
+common_pitfalls:
+  - 在 socket assigns 中存储过多内容（内存膨胀）
+  - 不对大型列表使用 streams（性能）
+  - 忘记在 stream 容器上使用 phx-update="stream"
+  - 不处理未连接状态
+  - 缺少 phx-value-* 属性
+  - 不测试并发更新
+
+estimated_time: 4-8 小时（取决于复杂性）

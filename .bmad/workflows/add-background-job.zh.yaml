@@ -1,0 +1,635 @@
+# BMAD 工作流：添加后台任务
+# 在为 Phoenix 添加后台处理时使用此工作流
+
+name: 添加后台任务
+description: 使用 Oban 或 GenServer 实现后台任务的完整工作流
+type: feature
+framework: phoenix_background_jobs
+complexity: medium-high
+agents_involved:
+  - elixir-architect
+  - elixir-dev
+  - elixir-qa
+
+prerequisites:
+  - 已做出决定：Oban vs GenServer/Task
+  - 理解任务需求（调度、重试、并发）
+  - 数据库设置（用于 Oban）
+  - 监督树理解
+
+steps:
+  - name: 选择后台任务策略
+    agent: elixir-architect
+    duration: 15-30min
+    decision_matrix:
+      use_oban_when:
+        - "需要持久化任务队列（应用重启后仍存在）"
+        - "需要带退避的重试逻辑"
+        - "需要任务调度（类似 cron）"
+        - "需要任务监控和可观测性"
+        - "处理用户触发的异步操作"
+
+      use_genserver_when:
+        - "简单的周期性任务"
+        - "需要内存中的状态管理"
+        - "实时处理需求"
+        - "不想要数据库依赖"
+
+      use_task_when:
+        - "一次性即发即忘操作"
+        - "不需要重试"
+        - "短期运行的操作"
+
+    recommendation: "生产环境后台任务使用 Oban，内部服务使用 GenServer"
+
+  - name: 设置 Oban（如果选择）
+    agent: elixir-dev
+    duration: 30min
+    tasks:
+      - 在 mix.exs 中添加 Oban 依赖
+      - 创建 Oban 迁移
+      - 在 application.ex 中配置 Oban
+      - 设置队列和并发
+    setup: |
+      # 在 mix.exs 中
+      {:oban, "~> 2.15"}
+
+      # 生成迁移
+      mix ecto.gen.migration add_oban_jobs_table
+
+      # 在迁移中
+      def up do
+        Oban.Migration.up(version: 12)
+      end
+
+      def down do
+        Oban.Migration.down(version: 1)
+      end
+
+      # 在 config/config.exs 中
+      config :my_app, Oban,
+        repo: MyApp.Repo,
+        plugins: [
+          Oban.Plugins.Pruner,
+          {Oban.Plugins.Cron,
+           crontab: [
+             {"0 2 * * *", MyApp.Workers.DailyReport},
+             {"*/15 * * * *", MyApp.Workers.StaleDataCleanup}
+           ]}
+        ],
+        queues: [default: 10, events: 50, media: 5, mailers: 20]
+
+      # 在 application.ex 中
+      children = [
+        MyApp.Repo,
+        {Oban, Application.fetch_env!(:my_app, Oban)}
+      ]
+
+  - name: 创建 Oban Worker
+    agent: elixir-dev
+    duration: 30min - 1hr
+    tasks:
+      - 创建 worker 模块
+      - 实现 perform/1 函数
+      - 添加错误处理
+      - 配置队列和重试选项
+    pattern: |
+      defmodule MyApp.Workers.EmailWorker do
+        use Oban.Worker,
+          queue: :mailers,
+          max_attempts: 3,
+          priority: 0,
+          tags: ["email", "notification"]
+
+        alias MyApp.Mailer
+        alias MyApp.Accounts
+
+        @impl Oban.Worker
+        def perform(%Oban.Job{args: %{"user_id" => user_id, "template" => template}}) do
+          with {:ok, user} <- Accounts.get_user(user_id),
+               {:ok, _} <- Mailer.send_email(user, template) do
+            :ok
+          else
+            {:error, :not_found} ->
+              # 用户不存在时不重试
+              {:discard, "User not found"}
+
+            {:error, reason} ->
+              # 将根据 max_attempts 重试
+              {:error, reason}
+          end
+        end
+
+        # 定时任务示例
+        @impl Oban.Worker
+        def perform(%Oban.Job{args: %{"type" => "daily_summary"}}) do
+          users = Accounts.list_active_users()
+
+          Enum.each(users, fn user ->
+            summary = generate_daily_summary(user)
+            Mailer.send_daily_summary(user, summary)
+          end)
+
+          :ok
+        end
+
+        # 入队任务的辅助函数
+        def enqueue_email(user_id, template) do
+          %{user_id: user_id, template: template}
+          |> new()
+          |> Oban.insert()
+        end
+
+        # 稍后调度
+        def schedule_email(user_id, template, scheduled_at) do
+          %{user_id: user_id, template: template}
+          |> new(scheduled_at: scheduled_at)
+          |> Oban.insert()
+        end
+      end
+
+  - name: 创建 GenServer Worker（如果选择）
+    agent: elixir-architect
+    duration: 1-2hrs
+    tasks:
+      - 创建 GenServer 模块
+      - 实现 init/1、handle_call/3、handle_cast/2、handle_info/2
+      - 添加到监督树
+      - 使用 Process.send_after 实现调度
+    pattern: |
+      defmodule MyApp.Workers.CacheWarmer do
+        use GenServer
+        require Logger
+
+        @refresh_interval :timer.minutes(15)
+
+        # 客户端 API
+
+        def start_link(opts) do
+          GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+        end
+
+        def refresh_cache do
+          GenServer.cast(__MODULE__, :refresh_cache)
+        end
+
+        def get_stats do
+          GenServer.call(__MODULE__, :get_stats)
+        end
+
+        # 服务器回调
+
+        @impl true
+        def init(_opts) do
+          # 调度初始缓存预热
+          send(self(), :warm_cache)
+
+          state = %{
+            last_refreshed: nil,
+            cache_size: 0,
+            refresh_count: 0
+          }
+
+          {:ok, state}
+        end
+
+        @impl true
+        def handle_info(:warm_cache, state) do
+          Logger.info("Warming cache...")
+
+          # 执行缓存预热
+          cache_data = load_cache_data()
+          cache_size = warm_cache(cache_data)
+
+          # 调度下一次刷新
+          Process.send_after(self(), :warm_cache, @refresh_interval)
+
+          new_state = %{state |
+            last_refreshed: DateTime.utc_now(),
+            cache_size: cache_size,
+            refresh_count: state.refresh_count + 1
+          }
+
+          {:noreply, new_state}
+        end
+
+        @impl true
+        def handle_cast(:refresh_cache, state) do
+          # 请求立即刷新
+          send(self(), :warm_cache)
+          {:noreply, state}
+        end
+
+        @impl true
+        def handle_call(:get_stats, _from, state) do
+          stats = %{
+            last_refreshed: state.last_refreshed,
+            cache_size: state.cache_size,
+            refresh_count: state.refresh_count
+          }
+          {:reply, stats, state}
+        end
+
+        # 私有函数
+
+        defp load_cache_data do
+          # 加载需要缓存的数据
+          MyApp.Catalog.list_active_products()
+        end
+
+        defp warm_cache(data) do
+          # 用数据预热缓存
+          Enum.each(data, fn item ->
+            MyApp.Cache.put("product:#{item.id}", item)
+          end)
+
+          length(data)
+        end
+      end
+
+      # 在 application.ex 中添加到监督树
+      children = [
+        MyApp.Repo,
+        MyApp.Workers.CacheWarmer
+      ]
+
+  - name: 添加到监督树
+    agent: elixir-architect
+    duration: 15-30min
+    tasks:
+      - 决定重启策略
+      - 在 application.ex 中添加 worker
+      - 如果动态创建 worker，考虑使用 DynamicSupervisor
+    patterns:
+      simple_worker: |
+        # 在 application.ex 中
+        children = [
+          MyApp.Repo,
+          {MyApp.Workers.CacheWarmer, []}
+        ]
+
+      with_restart_strategy: |
+        children = [
+          {MyApp.Workers.CacheWarmer, []},
+          # 重启：permanent（总是重启）
+          #       temporary（从不重启）
+          #       transient（仅在异常退出时重启）
+          Supervisor.child_spec(
+            {MyApp.Workers.DataSync, []},
+            restart: :transient
+          )
+        ]
+
+      dynamic_workers: |
+        # 用于按需创建的 worker
+        children = [
+          {DynamicSupervisor, name: MyApp.WorkerSupervisor, strategy: :one_for_one}
+        ]
+
+        # 动态启动 worker
+        DynamicSupervisor.start_child(
+          MyApp.WorkerSupervisor,
+          {MyApp.Workers.UserSessionWorker, user_id: user_id}
+        )
+
+  - name: 实现任务逻辑
+    agent: elixir-dev
+    duration: 1-3hrs
+    considerations:
+      - 幂等性：任务可以安全地运行多次吗？
+      - 错误处理：失败时会发生什么？
+      - 超时：任务应该运行多长时间？
+      - 依赖：如果依赖服务宕机怎么办？
+      - 数据一致性：处理并发修改
+    patterns:
+      idempotent_operation: |
+        def perform(%{args: %{"order_id" => order_id}}) do
+          # 检查是否已处理
+          case MyApp.Orders.get_order(order_id) do
+            {:ok, %{status: :processed}} ->
+              # 已处理，不再处理
+              :ok
+
+            {:ok, order} ->
+              # 处理订单
+              MyApp.Orders.process_order(order)
+
+            {:error, :not_found} ->
+              {:discard, "Order not found"}
+          end
+        end
+
+      with_timeout: |
+        def perform(%{args: args}) do
+          # 为长时间运行的操作设置超时
+          task = Task.async(fn ->
+            expensive_operation(args)
+          end)
+
+          case Task.await(task, :timer.minutes(5)) do
+            {:ok, result} -> {:ok, result}
+            {:error, reason} -> {:error, reason}
+          end
+        catch
+          :exit, {:timeout, _} ->
+            # 操作超时
+            {:error, :timeout}
+        end
+
+      batch_processing: |
+        def perform(%{args: %{"batch_size" => batch_size}}) do
+          # 分批处理以避免内存问题
+          MyApp.Products
+          |> MyApp.Repo.stream()
+          |> Stream.chunk_every(batch_size)
+          |> Stream.each(&process_batch/1)
+          |> Stream.run()
+
+          :ok
+        end
+
+        defp process_batch(products) do
+          Enum.each(products, &update_product/1)
+        end
+
+  - name: 添加监控和可观测性
+    agent: elixir-dev
+    duration: 30min - 1hr
+    tasks:
+      - 为任务开始/结束添加日志
+      - 跟踪任务指标（持续时间、成功率）
+      - 添加 Telemetry 事件
+      - 为失败设置告警
+    pattern: |
+      # 使用 Telemetry
+      def perform(%{args: args}) do
+        start_time = System.monotonic_time()
+
+        :telemetry.execute(
+          [:my_app, :worker, :start],
+          %{system_time: System.system_time()},
+          %{worker: __MODULE__, args: args}
+        )
+
+        result = do_work(args)
+
+        duration = System.monotonic_time() - start_time
+
+        :telemetry.execute(
+          [:my_app, :worker, :stop],
+          %{duration: duration},
+          %{worker: __MODULE__, result: result}
+        )
+
+        result
+      end
+
+      # 在 application.ex 中附加处理程序
+      :telemetry.attach(
+        "log-worker-execution",
+        [:my_app, :worker, :stop],
+        &MyApp.Telemetry.handle_worker_event/4,
+        nil
+      )
+
+  - name: 实现错误处理和重试
+    agent: elixir-dev
+    duration: 30min - 1hr
+    strategies:
+      oban_retry:
+        config: |
+          use Oban.Worker,
+            max_attempts: 5,
+            backoff: :exponential  # 或自定义函数
+
+        custom_backoff: |
+          def backoff(%Job{attempt: attempt}) do
+            # 自定义退避：30s、1m、5m、15m、30m
+            trunc(:math.pow(2, attempt) * 30)
+          end
+
+      genserver_retry: |
+        def handle_info(:perform_task, state) do
+          case do_task() do
+            :ok ->
+              schedule_next_run()
+              {:noreply, %{state | errors: 0}}
+
+            {:error, reason} ->
+              Logger.error("Task failed: #{inspect(reason)}")
+
+              new_errors = state.errors + 1
+
+              if new_errors < 3 do
+                # 带退避的重试
+                Process.send_after(self(), :perform_task, backoff_time(new_errors))
+                {:noreply, %{state | errors: new_errors}}
+              else
+                # 太多错误，放弃
+                Logger.error("Task failed after 3 attempts")
+                {:noreply, %{state | errors: 0, status: :failed}}
+              end
+          end
+        end
+
+        defp backoff_time(attempt), do: :timer.seconds(trunc(:math.pow(2, attempt)))
+
+  - name: 编写测试
+    agent: elixir-qa
+    duration: 2-3hrs
+    test_categories:
+      oban_tests:
+        - 测试任务正确入队
+        - 测试 perform/1 成功执行
+        - 测试错误处理和重试
+        - 测试定时任务
+        - 测试任务取消
+
+      genserver_tests:
+        - 测试 start_link 正确初始化
+        - 测试周期性任务执行
+        - 测试 handle_call/cast/info
+        - 测试监督重启行为
+
+    patterns:
+      oban_test: |
+        defmodule MyApp.Workers.EmailWorkerTest do
+          use MyApp.DataCase, async: true
+          use Oban.Testing, repo: MyApp.Repo
+
+          alias MyApp.Workers.EmailWorker
+
+          describe "perform/1" do
+            test "成功发送邮件" do
+              user = user_fixture()
+
+              assert :ok =
+                perform_job(EmailWorker, %{
+                  user_id: user.id,
+                  template: "welcome"
+                })
+
+              # 验证邮件已发送
+              assert_email_sent(to: user.email)
+            end
+
+            test "用户不存在时丢弃任务" do
+              assert {:discard, "User not found"} =
+                perform_job(EmailWorker, %{
+                  user_id: 999,
+                  template: "welcome"
+                })
+            end
+
+            test "临时失败时重试" do
+              user = user_fixture()
+
+              # 模拟临时失败
+              expect(MyApp.Mailer, :send_email, fn _, _ ->
+                {:error, :smtp_timeout}
+              end)
+
+              assert {:error, :smtp_timeout} =
+                perform_job(EmailWorker, %{
+                  user_id: user.id,
+                  template: "welcome"
+                })
+            end
+
+            test "正确入队任务" do
+              user = user_fixture()
+
+              assert {:ok, %Oban.Job{}} =
+                EmailWorker.enqueue_email(user.id, "welcome")
+
+              # 验证任务在数据库中
+              assert_enqueued(worker: EmailWorker, args: %{
+                user_id: user.id,
+                template: "welcome"
+              })
+            end
+          end
+        end
+
+      genserver_test: |
+        defmodule MyApp.Workers.CacheWarmerTest do
+          use MyApp.DataCase
+          alias MyApp.Workers.CacheWarmer
+
+          describe "start_link/1" do
+            test "成功启动" do
+              assert {:ok, pid} = CacheWarmer.start_link([])
+              assert Process.alive?(pid)
+            end
+          end
+
+          describe "缓存预热" do
+            test "启动时预热缓存" do
+              {:ok, _pid} = start_supervised(CacheWarmer)
+
+              # 等待初始缓存预热
+              :timer.sleep(100)
+
+              stats = CacheWarmer.get_stats()
+              assert stats.cache_size > 0
+              assert stats.refresh_count == 1
+            end
+
+            test "定期刷新缓存" do
+              {:ok, _pid} = start_supervised(CacheWarmer)
+
+              initial_stats = CacheWarmer.get_stats()
+
+              # 触发刷新
+              CacheWarmer.refresh_cache()
+              :timer.sleep(100)
+
+              new_stats = CacheWarmer.get_stats()
+              assert new_stats.refresh_count > initial_stats.refresh_count
+            end
+          end
+        end
+
+  - name: 添加任务监控
+    agent: elixir-dev
+    duration: 30min
+    tasks:
+      - 创建管理界面查看任务
+      - 添加指标收集
+      - 设置失败告警
+    tools:
+      - Oban Web（用于 Oban）
+      - Phoenix LiveDashboard
+      - 自定义 LiveView 用于任务统计
+
+  - name: 质量验证
+    agent: elixir-qa
+    duration: 30min - 1hr
+    checks:
+      - 任务成功执行
+      - 错误处理正确工作
+      - 重试逻辑按预期运行
+      - 任务不泄漏内存
+      - 负载下性能可接受
+      - 监控到位
+    success_criteria:
+      - 所有测试通过
+      - 任务在应用重启后存活（如果持久化）
+      - 失败的任务适当重试
+      - 无内存泄漏
+
+checklist:
+  design:
+    - [ ] 已选择后台任务策略（Oban vs GenServer）
+    - [ ] 任务需求清晰（调度、重试、并发）
+    - [ ] 已定义错误处理策略
+    - [ ] 已决定监控方法
+
+  implementation:
+    - [ ] Oban 已配置（如果选择）
+    - [ ] Worker 模块已创建，包含 perform/1
+    - [ ] 已添加到监督树
+    - [ ] 已实现错误处理
+    - [ ] 已配置重试逻辑
+    - [ ] 已添加日志
+
+  testing:
+    - [ ] 已测试任务执行
+    - [ ] 已覆盖错误情况
+    - [ ] 已验证重试行为
+    - [ ] 已测试性能
+    - [ ] 已监控内存使用
+
+  production:
+    - [ ] 监控已到位
+    - [ ] 已为失败配置告警
+    - [ ] 任务队列大小适当
+    - [ ] 已设置并发限制
+    - [ ] 文档已完成
+
+best_practices:
+  - "使任务幂等（安全地运行多次）"
+  - "添加超时以防止失控任务"
+  - "对重试使用指数退避"
+  - "对大型数据集分批处理"
+  - "监控任务指标和失败"
+  - "测试重试和错误处理"
+  - "记录任务目的和行为"
+
+common_patterns:
+  scheduled_jobs:
+    - "每天凌晨 2 点的日报"
+    - "每小时清理过期数据"
+    - "周一发送周报摘要"
+
+  event_driven_jobs:
+    - "用户注册后发送邮件"
+    - "处理上传的文件"
+    - "订单后生成发票"
+
+  periodic_maintenance:
+    - "每 15 分钟刷新缓存"
+    - "每小时与外部 API 同步"
+    - "每月归档旧记录"
+
+estimated_time: 3-6 小时（取决于复杂性）

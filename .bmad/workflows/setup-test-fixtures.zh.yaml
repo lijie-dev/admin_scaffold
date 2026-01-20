@@ -1,0 +1,629 @@
+# BMAD 工作流：设置测试夹具和模拟
+# 在为 Elixir/Phoenix 项目建立测试基础设施时使用此工作流
+
+name: 设置测试夹具和模拟
+description: 用于创建可维护的测试数据基础设施（包括夹具和模拟）的完整工作流
+type: testing_infrastructure
+framework: exunit_testing
+complexity: medium
+agents_involved:
+  - test-fixtures-specialist
+  - elixir-dev
+  - elixir-qa
+
+prerequisites:
+  - ExUnit 测试框架已设置
+  - 数据库模式已定义
+  - 理解需要测试数据的实体
+  - Mox 已添加到 mix.exs（如果模拟外部依赖）
+
+steps:
+  - name: 分析测试数据需求
+    agent: test-fixtures-specialist
+    duration: 30min
+    tasks:
+      - 识别所有需要夹具的模式
+      - 映射实体关系和关联
+      - 识别需要模拟的外部依赖
+      - 规划所需的夹具实用程序助手
+
+    deliverables:
+      - 需要夹具的实体列表
+      - 关联图
+      - 需要模拟的依赖列表
+      - 实用程序助手计划
+
+  - name: 创建夹具模块
+    agent: test-fixtures-specialist
+    duration: 1-2hrs
+    tasks:
+      - 创建 test/support/fixtures.ex
+      - 实现 fixture/2 主函数
+      - 为每个实体创建 build/2
+      - 智能处理关联
+
+    pattern: |
+      defmodule MyApp.Fixtures do
+        @moduledoc """
+        此模块定义用于为测试创建实体的测试助手。
+        它将所有夹具整合到单个模块中，具有一致的接口。
+        """
+
+        alias MyApp.Repo
+        alias MyApp.Accounts.User
+        alias MyApp.Blog.Post
+        # ... 其他模式
+
+        @doc """
+        根据给定的模式和属性在数据库中创建记录。
+
+        这是主要的夹具函数，构建结构体并插入它。
+        """
+        def fixture(schema, attrs \\ %{}) do
+          schema
+          |> build(attrs)
+          |> Repo.insert!()
+        end
+
+        @doc """
+        构建结构体而不将其插入数据库。
+        """
+        def build(:user, attrs) do
+          password = attrs[:password] || "Password123!"
+
+          %User{}
+          |> User.registration_changeset(
+            attrs
+            |> Enum.into(%{
+              email: "user-#{System.unique_integer([:positive])}@example.com",
+              name: "Test User",
+              password: password,
+              password_confirmation: password,
+              active: true
+            })
+          )
+        end
+
+        def build(:post, attrs) do
+          # 如果未提供，则创建用户
+          user = attrs[:user] || fixture(:user)
+
+          %Post{}
+          |> Post.changeset(
+            attrs
+            |> Map.delete(:user)
+            |> Enum.into(%{
+              title: "Post #{System.unique_integer([:positive])}",
+              body: "Test post content",
+              user_id: user.id,
+              published: false
+            })
+          )
+        end
+
+        # 为每个模式添加 build/2
+      end
+
+    critical_rules:
+      - "对所有唯一字段使用 System.unique_integer([:positive])"
+      - "对金额字段使用 Decimal.new()（绝不使用浮点数）"
+      - "如果未提供，则创建关联（user = attrs[:user] || fixture(:user)）"
+      - "在 Enum.into 之前删除关联键（Map.delete(:user)）"
+      - "将 DateTime 截断为 :second（DateTime.truncate(DateTime.utc_now(), :second)）"
+
+  - name: 添加夹具实用程序助手
+    agent: test-fixtures-specialist
+    duration: 30min-1hr
+    tasks:
+      - 创建复合创建助手
+      - 添加批量创建函数
+      - 实现状态特定的助手
+      - 添加便利函数
+
+    patterns:
+      composite_creation: |
+        @doc """
+        创建已附加评论的博客文章。
+        """
+        def create_post_with_comments(attrs \\ %{}) do
+          user = attrs[:user] || fixture(:user)
+          comment_count = attrs[:comment_count] || 3
+
+          post = fixture(:post, Map.put(attrs, :user, user))
+
+          Enum.map(1..comment_count, fn i ->
+            fixture(:comment, %{
+              post: post,
+              user: user,
+              body: "Comment #{i}"
+            })
+          end)
+
+          post
+        end
+
+      bulk_creation: |
+        @doc """
+        创建多个文章用于测试分页。
+        """
+        def create_posts(count, attrs \\ %{}) do
+          user = attrs[:user] || fixture(:user)
+
+          Enum.map(1..count, fn i ->
+            post_attrs = Map.merge(attrs, %{
+              user: user,
+              title: "Post #{i}",
+              body: "Content for post #{i}"
+            })
+
+            fixture(:post, post_attrs)
+          end)
+        end
+
+      state_specific: |
+        @doc """
+        创建具有特定时间戳的已发布文章。
+        """
+        def create_published_post(attrs \\ %{}) do
+          user = attrs[:user] || fixture(:user)
+          published_at = attrs[:published_at] ||
+            DateTime.utc_now() |> DateTime.truncate(:second)
+
+          fixture(:post, Map.merge(attrs, %{
+            user: user,
+            published: true,
+            published_at: published_at
+          }))
+        end
+
+  - name: 为可模拟的依赖定义行为
+    agent: test-fixtures-specialist
+    duration: 30min-1hr
+    tasks:
+      - 识别外部 API 和服务
+      - 在生产代码中创建行为模块
+      - 为每个函数定义 @callback
+      - 更新真实实现以使用 @behaviour
+
+    pattern: |
+      # 在 lib/my_app/integrations/email.ex（生产代码）中
+      defmodule MyApp.Integrations.Email.EmailBehaviour do
+        @moduledoc """
+        定义电子邮件服务的行为。
+        允许在测试中进行模拟。
+        """
+
+        @callback send_email(to :: String.t(), subject :: String.t(), body :: String.t()) ::
+          {:ok, map()} | {:error, any()}
+
+        @callback send_template_email(to :: String.t(), template :: String.t(), vars :: map()) ::
+          {:ok, map()} | {:error, any()}
+      end
+
+      defmodule MyApp.Integrations.Email do
+        @behaviour MyApp.Integrations.Email.EmailBehaviour
+
+        @impl true
+        def send_email(to, subject, body) do
+          # 真实的 SendGrid/Mailgun/等 API 调用
+          case HTTPoison.post(email_service_url(), build_payload(to, subject, body)) do
+            {:ok, %{status_code: 200, body: response}} ->
+              {:ok, Jason.decode!(response)}
+            {:ok, %{status_code: status}} ->
+              {:error, "Failed with status #{status}"}
+            {:error, reason} ->
+              {:error, reason}
+          end
+        end
+
+        @impl true
+        def send_template_email(to, template, vars) do
+          # 实现
+        end
+      end
+
+  - name: 创建模拟模块
+    agent: test-fixtures-specialist
+    duration: 30min
+    tasks:
+      - 创建 test/support/mocks.ex
+      - 为每个行为添加 Mox.defmock
+      - 创建带有存根的模拟模块（如果需要）
+      - 记录模拟用法
+
+    pattern: |
+      defmodule MyApp.Mocks do
+        @moduledoc """
+        使用 Mox 定义所有用于测试的模拟。
+        所有模拟都在一个地方，便于组织和发现。
+        """
+
+        # 为电子邮件服务定义模拟
+        Mox.defmock(MyApp.MockEmail,
+          for: MyApp.Integrations.Email.EmailBehaviour
+        )
+
+        # 为支付处理器定义模拟
+        Mox.defmock(MyApp.MockPaymentProcessor,
+          for: MyApp.Integrations.PaymentProcessor.PaymentBehaviour
+        )
+
+        # 为外部 API 定义模拟
+        Mox.defmock(MyApp.MockExternalAPI,
+          for: MyApp.Integrations.ExternalAPI.APIBehaviour
+        )
+      end
+
+    mock_module_stubs: |
+      # 对于需要存根实现的模块
+      defmodule MyApp.MockSettings do
+        @moduledoc """
+        用于测试的设置模块的模拟实现。
+        提供测试安全的存根实现。
+        """
+
+        def get_setting_value(key, default \\ nil)
+
+        def get_setting_value("api_key", _default) do
+          {:ok, "test_api_key_12345"}
+        end
+
+        def get_setting_value("feature_flag", _default) do
+          {:ok, "true"}
+        end
+
+        # 默认：为了安全起见返回默认值
+        def get_setting_value(_key, default) do
+          {:ok, default}
+        end
+      end
+
+  - name: 使用助手增强 DataCase
+    agent: test-fixtures-specialist
+    duration: 30min
+    tasks:
+      - 添加 errors_on/1 助手
+      - 添加 assert_unique_constraint/3
+      - 添加自定义设置助手
+      - 添加测试凭证设置
+
+    pattern: |
+      defmodule MyApp.DataCase do
+        use ExUnit.CaseTemplate
+
+        using do
+          quote do
+            alias MyApp.Repo
+            import Ecto
+            import Ecto.Changeset
+            import Ecto.Query
+            import MyApp.DataCase
+          end
+        end
+
+        setup tags do
+          MyApp.DataCase.setup_sandbox(tags)
+
+          # 如果需要，设置测试凭证
+          unless tags[:skip_test_credentials] do
+            setup_test_credentials()
+          end
+
+          :ok
+        end
+
+        def setup_sandbox(tags) do
+          pid = Ecto.Adapters.SQL.Sandbox.start_owner!(
+            MyApp.Repo,
+            shared: not tags[:async]
+          )
+          on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+        end
+
+        @doc """
+        为 API 集成设置测试凭证。
+        """
+        def setup_test_credentials do
+          alias MyApp.{Fixtures, Settings}
+
+          tenant = Fixtures.fixture(:tenant)
+
+          Settings.put_encrypted_setting(
+            tenant.id,
+            "api_key",
+            "test_api_key_12345"
+          )
+
+          :ok
+        end
+
+        @doc """
+        将变更集错误转换为消息映射的助手。
+        """
+        def errors_on(changeset) do
+          Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+            Regex.replace(~r"%{(\w+)}", message, fn _, key ->
+              opts
+              |> Keyword.get(String.to_existing_atom(key), key)
+              |> to_string()
+            end)
+          end)
+        end
+
+        @doc """
+        用于测试唯一性约束的助手。
+        """
+        def assert_unique_constraint(changeset, field, message \\ "has already been taken") do
+          {:error, failed_changeset} = MyApp.Repo.insert(changeset)
+          assert %{^field => [^message]} = errors_on(failed_changeset)
+          failed_changeset
+        end
+      end
+
+  - name: 使用夹具和模拟编写测试
+    agent: elixir-qa
+    duration: varies
+    tasks:
+      - 在测试模块中导入夹具
+      - 在设置块中使用夹具
+      - 设置模拟期望
+      - 编写全面的测试
+
+    basic_test_pattern: |
+      defmodule MyApp.PostsTest do
+        use MyApp.DataCase, async: true
+
+        alias MyApp.Blog
+        import MyApp.Fixtures
+
+        describe "create_post/2" do
+          setup do
+            user = fixture(:user)
+            %{user: user}
+          end
+
+          test "creates post with valid attributes", %{user: user} do
+            attrs = %{
+              title: "Test Post",
+              body: "Test content"
+            }
+
+            assert {:ok, post} = Blog.create_post(user, attrs)
+            assert post.title == "Test Post"
+            assert post.body == "Test content"
+            assert post.user_id == user.id
+          end
+
+          test "requires title", %{user: user} do
+            attrs = %{body: "Content without title"}
+
+            assert {:error, changeset} = Blog.create_post(user, attrs)
+            assert %{title: ["can't be blank"]} = errors_on(changeset)
+          end
+        end
+
+        describe "list_posts/0" do
+          test "returns all posts ordered by date" do
+            user = fixture(:user)
+            _old_post = fixture(:post, %{user: user, title: "Old"})
+            new_post = fixture(:post, %{user: user, title: "New"})
+
+            posts = Blog.list_posts()
+
+            assert length(posts) == 2
+            assert hd(posts).id == new_post.id
+          end
+
+          test "preloads user association" do
+            user = fixture(:user, %{name: "John Doe"})
+            fixture(:post, %{user: user})
+
+            posts = Blog.list_posts()
+
+            assert hd(posts).user.name == "John Doe"
+          end
+        end
+      end
+
+    mock_test_pattern: |
+      defmodule MyApp.NotificationsTest do
+        use MyApp.DataCase, async: true
+
+        import Mox
+        import MyApp.Fixtures
+
+        # 确保模拟被验证
+        setup :verify_on_exit!
+
+        describe "notify_user/2" do
+          test "sends email via email service" do
+            user = fixture(:user, %{email: "test@example.com"})
+
+            # 设置模拟期望
+            expect(MyApp.MockEmail, :send_email, fn to, subject, body ->
+              assert to == "test@example.com"
+              assert subject =~ "Notification"
+              assert body =~ "Hello"
+              {:ok, %{id: "msg_123", status: "sent"}}
+            end)
+
+            # 执行调用模拟的代码
+            assert {:ok, result} = MyApp.Notifications.notify_user(user, "Hello")
+            assert result.id == "msg_123"
+          end
+
+          test "handles email service failure" do
+            user = fixture(:user)
+
+            # 模拟返回错误
+            expect(MyApp.MockEmail, :send_email, fn _, _, _ ->
+              {:error, :service_unavailable}
+            end)
+
+            assert {:error, :service_unavailable} =
+              MyApp.Notifications.notify_user(user, "Test")
+          end
+
+          test "sends multiple emails in batch" do
+            users = [fixture(:user), fixture(:user), fixture(:user)]
+
+            # 多次调用的存根
+            stub(MyApp.MockEmail, :send_email, fn _, _, _ ->
+              {:ok, %{status: "sent"}}
+            end)
+
+            assert {:ok, results} = MyApp.Notifications.notify_users(users, "Batch")
+            assert length(results) == 3
+          end
+        end
+      end
+
+  - name: 记录夹具用法
+    agent: test-fixtures-specialist
+    duration: 15-30min
+    tasks:
+      - 向 fixtures.ex 添加 @moduledoc
+      - 记录每个夹具函数
+      - 添加使用示例
+      - 创建测试指南
+
+    documentation_pattern: |
+      defmodule MyApp.Fixtures do
+        @moduledoc """
+        MyApp 的测试夹具。
+
+        此模块为系统中的所有实体提供测试数据创建助手。
+        所有夹具都使用智能默认值，可以通过属性自定义。
+
+        ## 用法
+
+        基本夹具创建：
+
+            user = fixture(:user)
+            post = fixture(:post, %{user: user, title: "Custom Title"})
+
+        构建而不插入：
+
+            changeset = build(:user, %{email: "custom@example.com"})
+
+        实用程序助手：
+
+            posts = create_posts(10)  # 创建 10 个文章
+            post = create_published_post()  # 创建已发布的文章
+
+        ## 可用的夹具
+
+        - `:user` - 创建具有电子邮件、密码的用户
+        - `:post` - 创建博客文章（如果未提供，则创建用户）
+        - `:comment` - 创建评论（如果未提供，则创建文章和用户）
+
+        有关详细信息，请参阅各个函数文档。
+        """
+
+        @doc """
+        创建用户夹具。
+
+        ## 选项
+
+        - `:email` - 自定义电子邮件（默认：唯一生成的电子邮件）
+        - `:name` - 用户名称（默认："Test User"）
+        - `:password` - 密码（默认："Password123!"）
+        - `:active` - 账户状态（默认：true）
+
+        ## 示例
+
+            user = fixture(:user)
+            admin = fixture(:user, %{email: "admin@example.com", name: "Admin"})
+        """
+        def build(:user, attrs) do
+          # 实现
+        end
+      end
+
+  - name: 验证测试基础设施
+    agent: elixir-qa
+    duration: 30min
+    tasks:
+      - 运行所有测试以验证夹具工作
+      - 检查模拟期望验证
+      - 确保测试并行运行（async: true）
+      - 验证没有测试污染或共享状态
+
+    validation_commands: |
+      # 运行所有测试
+      mix test
+
+      # 运行特定测试文件
+      mix test test/my_app/posts_test.exs
+
+      # 运行带覆盖率的测试
+      mix test --cover
+
+      # 仅运行失败的测试
+      mix test --failed
+
+      # 运行匹配模式的测试
+      mix test --only focus
+
+    success_criteria:
+      - 所有测试通过
+      - 没有警告或编译错误
+      - 测试并行运行无问题
+      - 模拟正确验证
+      - 没有数据库约束违规
+      - 清晰的测试输出
+
+checklist:
+  fixtures:
+    - [ ] test/support/fixtures.ex 已创建
+    - [ ] fixture/2 主函数已实现
+    - [ ] 所有实体的 build/2
+    - [ ] 对唯一字段使用了 System.unique_integer
+    - [ ] 智能处理了关联
+    - [ ] 对金额字段使用了 Decimal.new
+    - [ ] 对时间戳使用了 DateTime.truncate
+    - [ ] 已添加实用程序助手
+    - [ ] 所有夹具都已记录
+
+  mocks:
+    - [ ] 在生产代码中定义了行为
+    - [ ] test/support/mocks.ex 已创建
+    - [ ] 为所有外部依赖添加了 Mox.defmock
+    - [ ] 模拟模块带有存根（如果需要）
+    - [ ] 模拟已记录
+
+  data_case:
+    - [ ] 已添加 errors_on/1 助手
+    - [ ] 已添加 assert_unique_constraint/3
+    - [ ] 已添加自定义设置助手
+    - [ ] 已添加测试凭证设置（如果需要）
+
+  tests:
+    - [ ] 在所有测试模块中导入了夹具
+    - [ ] 在设置块中使用了夹具
+    - [ ] 测试使用了 async: true
+    - [ ] 模拟测试使用了 verify_on_exit!
+    - [ ] 涵盖了快乐路径和边界情况
+    - [ ] 所有测试都通过
+
+best_practices:
+  - "单个 fixtures.ex 模块用于所有测试数据"
+  - "单个 mocks.ex 模块用于所有模拟"
+  - "对唯一性使用 System.unique_integer"
+  - "如果未提供，则创建关联"
+  - "在模拟之前定义行为"
+  - "对并行测试使用 async: true"
+  - "始终使用 Mox 的 verify_on_exit!"
+  - "记录所有夹具和模拟"
+
+common_pitfalls:
+  - "夹具分散在测试文件中"
+  - "硬编码值导致唯一性冲突"
+  - "对金额使用浮点数（使用 Decimal）"
+  - "忘记在 Enum.into 之前删除关联键"
+  - "未将 DateTime 截断为 :second"
+  - "在定义行为之前进行模拟"
+  - "在模拟测试中忘记 verify_on_exit!"
+  - "测试之间的共享可变状态"
+
+estimated_time: 3-5 hours (initial setup)

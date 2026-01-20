@@ -1,0 +1,72 @@
+id: STORY-001
+title: 添加 Hello BMAD 页面
+status: ready_for_dev
+type: feature
+priority: medium
+size: XS
+assigned_agent: elixir-dev
+created_date: 2026-01-19
+updated_date: 2026-01-19
+
+user_story:
+  as_a: 用户
+  i_want_to: 访问一个 Hello BMAD 页面
+  so_that: 我可以验证 BmadElixir 框架已正确安装
+
+acceptance_criteria:
+  - scenario: 访问 Hello BMAD 页面
+    given: 我是一个访问网站的用户
+    when: 我访问 /hello 路径
+    then: 我应该看到 "Hello BMAD!" 消息
+
+technical_tasks:
+  context:
+    - 创建 HelloController
+    - 添加 hello action
+
+  liveview: []
+  real_time: []
+  performance: []
+
+dependencies: []
+
+non_functional_requirements:
+  performance:
+    - 页面响应时间 < 100ms
+  security: []
+  scalability: []
+  observability: []
+
+edge_cases: []
+
+testing_strategy:
+  unit:
+    - 测试 HelloController.hello/2 返回正确的响应
+  integration:
+    - 测试 GET /hello 返回 200 状态码
+  performance: []
+
+checklists:
+  before_starting:
+    - [ ] 确认 Phoenix 项目正常运行
+    - [ ] 确认 BmadElixir 已初始化
+
+  during_development:
+    - [ ] 创建 controller
+    - [ ] 添加路由
+    - [ ] 编写测试
+
+  before_completing:
+    - [ ] 所有测试通过
+    - [ ] 代码已格式化
+    - [ ] 无 Credo 警告
+
+qa_validation:
+  - 手动访问 /hello 路径
+  - 验证显示 "Hello BMAD!" 消息
+
+definition_of_done:
+  - [ ] 功能实现完成
+  - [ ] 测试覆盖率 100%
+  - [ ] 代码审查通过
+  - [ ] 文档已更新

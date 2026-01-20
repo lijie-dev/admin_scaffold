@@ -1,0 +1,284 @@
+# BMAD 工作流：添加 Phoenix Context
+# 在向 Phoenix 应用程序添加新的有界上下文时使用此工作流
+
+name: 添加 Phoenix Context
+description: 系统化工作流，用于添加新的 Phoenix context，包括 schema、迁移和测试
+type: feature
+framework: phoenix
+complexity: medium
+agents_involved:
+  - elixir-architect
+  - elixir-dev
+  - elixir-qa
+
+steps:
+  - name: 定义 Context 边界
+    agent: elixir-architect
+    duration: 30分钟 - 1小时
+    actions:
+      - 识别有界域（例如 Accounts、Billing、Content）
+      - 定义公共 API 函数
+      - 识别与其他 context 的关系
+      - 规划数据库 schema 和表
+      - 记录 context 的职责
+    questions:
+      - 核心域概念是什么？
+      - 其他 context 需要什么操作？
+      - 这个 context 拥有什么数据？
+      - 它与现有 context 的关系如何？
+    deliverable: Context 设计文档
+
+  - name: 生成 Context 骨架
+    agent: elixir-dev
+    duration: 15-30分钟
+    commands:
+      - "mix phx.gen.context ContextName SchemaName table_name field:type ..."
+      - 示例："mix phx.gen.context Accounts User users email:string:unique name:string"
+    notes: |
+      这会生成：
+      - lib/my_app/context_name.ex (context 模块)
+      - lib/my_app/context_name/schema_name.ex (schema)
+      - priv/repo/migrations/timestamp_create_table_name.exs
+      - test/my_app/context_name_test.exs
+      - test/support/fixtures/context_name_fixtures.ex
+
+  - name: 自定义 Schema
+    agent: elixir-dev
+    duration: 30分钟 - 2小时
+    tasks:
+      - 添加关联（belongs_to、has_many 等）
+      - 定义 changeset 验证
+      - 根据需要添加虚拟字段
+      - 设置嵌入式 schema（如需要）
+      - 添加数据库约束
+    example: |
+      schema "users" do
+        field :email, :string
+        field :name, :string
+        has_many :posts, MyApp.Content.Post
+        belongs_to :organization, MyApp.Accounts.Organization
+
+        timestamps()
+      end
+
+      def changeset(user, attrs) do
+        user
+        |> cast(attrs, [:email, :name, :organization_id])
+        |> validate_required([:email, :name])
+        |> validate_format(:email, ~r/@/)
+        |> unique_constraint(:email)
+      end
+
+  - name: 增强迁移
+    agent: elixir-dev
+    duration: 15-30分钟
+    tasks:
+      - 为外键添加索引
+      - 为常见查询字段添加索引
+      - 添加唯一约束
+      - 根据需要添加检查约束
+      - 使迁移可逆
+    example: |
+      def change do
+        create table(:users) do
+          add :email, :string, null: false
+          add :name, :string, null: false
+          add :organization_id, references(:organizations), null: false
+
+          timestamps()
+        end
+
+        create unique_index(:users, [:email])
+        create index(:users, [:organization_id])
+      end
+
+  - name: 实现 Context API
+    agent: elixir-dev
+    duration: 2-4小时
+    tasks:
+      - 实现列表/查询函数
+      - 实现获取/提取函数
+      - 实现创建函数
+      - 实现更新函数
+      - 实现删除函数
+      - 添加过滤和排序
+      - 根据需要添加分页
+    patterns:
+      list_items: |
+        def list_users do
+          Repo.all(User)
+        end
+
+        def list_users(filters) do
+          User
+          |> apply_filters(filters)
+          |> Repo.all()
+        end
+
+      get_item: |
+        def get_user!(id), do: Repo.get!(User, id)
+        def get_user(id), do: Repo.get(User, id)
+
+      create_item: |
+        def create_user(attrs \\ %{}) do
+          %User{}
+          |> User.changeset(attrs)
+          |> Repo.insert()
+        end
+
+      update_item: |
+        def update_user(%User{} = user, attrs) do
+          user
+          |> User.changeset(attrs)
+          |> Repo.update()
+        end
+
+  - name: 编写全面的测试
+    agent: elixir-dev
+    duration: 2-3小时
+    test_categories:
+      - 列表函数（空、有项目、有过滤）
+      - 获取函数（找到、未找到）
+      - 创建（有效属性、无效属性、约束违反）
+      - 更新（有效更改、无效更改）
+      - 删除（存在、不存在）
+      - 关联（预加载、连接查询）
+    example: |
+      describe "list_users/0" do
+        test "returns all users" do
+          user = user_fixture()
+          assert Accounts.list_users() == [user]
+        end
+
+        test "returns empty list when no users" do
+          assert Accounts.list_users() == []
+        end
+      end
+
+      describe "create_user/1" do
+        test "creates user with valid attributes" do
+          attrs = %{email: "test@example.com", name: "Test"}
+          assert {:ok, %User{} = user} = Accounts.create_user(attrs)
+          assert user.email == "test@example.com"
+        end
+
+        test "returns error with invalid attributes" do
+          assert {:error, %Ecto.Changeset{}} = Accounts.create_user(%{})
+        end
+
+        test "enforces unique email" do
+          user_fixture(email: "test@example.com")
+          attrs = %{email: "test@example.com", name: "Another"}
+          assert {:error, changeset} = Accounts.create_user(attrs)
+          assert "has already been taken" in errors_on(changeset).email
+        end
+      end
+
+  - name: 运行迁移
+    agent: elixir-dev
+    duration: 5分钟
+    commands:
+      - "mix ecto.migrate"
+      - "MIX_ENV=test mix ecto.migrate"
+    verification:
+      - 检查迁移是否成功运行
+      - 验证表是否在数据库中创建
+      - 验证索引是否已创建
+
+  - name: 质量验证
+    agent: elixir-qa
+    duration: 30分钟 - 1小时
+    checks:
+      - 运行测试："mix test"
+      - 检查新 context 的覆盖率
+      - 运行 credo："mix credo lib/my_app/context_name"
+      - 验证 changeset 验证
+      - 测试边界情况
+      - 验证数据库约束是否有效
+    success_criteria:
+      - 所有测试通过
+      - 没有 credo 问题
+      - 边界情况已覆盖
+      - 约束已验证
+
+  - name: 文档
+    agent: elixir-dev
+    duration: 30分钟
+    tasks:
+      - 为 context 模块添加 @moduledoc
+      - 为所有公共函数添加 @doc
+      - 记录返回类型
+      - 添加使用示例
+      - 根据需要更新架构文档
+    example: |
+      @moduledoc """
+      Accounts context。
+
+      管理用户账户、身份验证和组织成员资格。
+      """
+
+      @doc """
+      返回用户列表。
+
+      ## 示例
+
+          iex> list_users()
+          [%User, ...]
+
+      """
+      def list_users do
+        Repo.all(User)
+      end
+
+checklist:
+  design:
+    - [ ] Context 边界清晰定义
+    - [ ] 公共 API 函数已识别
+    - [ ] Schema 关系已规划
+    - [ ] 数据库约束已识别
+
+  implementation:
+    - [ ] Schema 已创建，字段正确
+    - [ ] 关联定义正确
+    - [ ] Changeset 验证全面
+    - [ ] 迁移包含所有索引
+    - [ ] Context API 完整（CRUD 操作）
+    - [ ] 所有函数都经过适当测试
+
+  quality:
+    - [ ] 所有测试通过
+    - [ ] 测试覆盖率充分（80%+）
+    - [ ] 没有 credo 警告
+    - [ ] 数据库约束有效
+    - [ ] 文档完整
+
+  integration:
+    - [ ] 迁移成功运行
+    - [ ] 对现有代码没有破坏性更改
+    - [ ] 其他 context 可以使用公共 API
+    - [ ] 已使用示例数据测试性能
+
+common_patterns:
+  tenant_isolation:
+    - 向 schema 添加 tenant_id
+    - 按 tenant 过滤所有查询
+    - 添加限定于 tenant 的唯一约束
+
+  soft_delete:
+    - 添加 deleted_at 时间戳
+    - 在查询中过滤掉已删除的记录
+    - 创建恢复函数
+
+  audit_trail:
+    - 添加 inserted_by/updated_by 字段
+    - 跟踪谁进行了更改
+    - 考虑使用审计日志表
+
+anti_patterns:
+  - 在公共 API 中暴露 Ecto.Changeset（返回 {:ok, item} 或 {:error, changeset}）
+  - 臃肿的 context（如果超过 500 行，则拆分为较小的 context）
+  - 在控制器中直接调用 Repo（始终通过 context）
+  - 外键上缺少数据库索引
+  - 不测试约束违反
+
+estimated_time: 4-8 小时（取决于复杂性）

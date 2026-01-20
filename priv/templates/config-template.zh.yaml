@@ -1,0 +1,360 @@
+# Elixir/Phoenix 项目的 BMAD 配置
+# 将此文件复制到项目根目录的 .bmad/config.yaml
+
+bmad:
+  version: 1.0
+  project_name: my_phoenix_app
+  framework: phoenix
+  language: elixir
+
+  # 项目元数据
+  description: "用于 [目的] 的 Phoenix LiveView 应用程序"
+  repository: "https://github.com/org/my_phoenix_app"
+  elixir_version: "~> 1.14"
+  phoenix_version: "~> 1.7"
+  ecto_version: "~> 3.10"
+
+# 代理配置
+agents:
+  # 主要开发代理
+  - id: elixir-dev
+    name: "高级 Elixir/Phoenix 工程师"
+    role: development
+    enabled: true
+    tools:
+      - mix
+      - iex
+      - dialyzer
+      - credo
+    responsibilities:
+      - "按照现有模式实现功能"
+      - "编写全面的测试（TDD 方法）"
+      - "确保代码质量（credo、dialyzer、format）"
+      - "遵循 Phoenix/Ecto 最佳实践"
+
+  # 质量保证代理
+  - id: elixir-qa
+    name: "质量保证和测试专家"
+    role: quality_assurance
+    enabled: true
+    quality_gates:
+      - tests: "mix test - 所有测试必须通过"
+      - credo: "mix credo --strict - 无警告"
+      - dialyzer: "mix dialyzer - 无警告"
+      - format: "mix format --check-formatted"
+      - compile: "mix compile --warnings-as-errors"
+    coverage_target: 80
+
+  # 系统架构代理
+  - id: elixir-architect
+    name: "OTP 和系统设计架构师"
+    role: architecture
+    enabled: true
+    focus_areas:
+      - "OTP 监督树"
+      - "GenServer 设计模式"
+      - "Phoenix 上下文边界"
+      - "数据库模式设计"
+      - "容错策略"
+
+  # 项目管理代理
+  - id: elixir-sm
+    name: "Scrum Master 和故事管理员"
+    role: project_management
+    enabled: true
+    responsibilities:
+      - "从需求创建用户故事"
+      - "将史诗分解为故事"
+      - "定义验收标准"
+      - "协调代理协作"
+
+# 工作流配置
+workflows:
+  greenfield_phoenix:
+    enabled: true
+    template: "priv/workflows/greenfield-phoenix.yaml"
+    triggers:
+      - "新建 Phoenix 项目"
+
+  add_context:
+    enabled: true
+    template: "priv/workflows/add-phoenix-context.yaml"
+    triggers:
+      - "创建新的有界上下文"
+
+  add_liveview:
+    enabled: true
+    template: "priv/workflows/add-liveview-feature.yaml"
+    triggers:
+      - "实现 LiveView 功能"
+
+# 质量检查清单配置
+checklists:
+  phoenix:
+    enabled: true
+    path: "priv/checklists/phoenix-checklist.md"
+    enforce_on_commit: false
+
+  ecto:
+    enabled: true
+    path: "priv/checklists/ecto-checklist.md"
+    enforce_on_commit: false
+
+  liveview:
+    enabled: true
+    path: "priv/checklists/liveview-checklist.md"
+    enforce_on_commit: false
+
+# 任务指南配置
+task_guides:
+  - id: create-story
+    name: "创建用户故事"
+    path: "priv/tasks/create-story.md"
+
+  - id: qa-gate
+    name: "质量门验证"
+    path: "priv/tasks/qa-gate.md"
+
+  - id: write-tests
+    name: "编写全面的测试"
+    path: "priv/tasks/write-tests.md"
+
+  - id: create-context
+    name: "创建 Phoenix 上下文"
+    path: "priv/tasks/create-context.md"
+
+  - id: create-liveview
+    name: "创建 LiveView 功能"
+    path: "priv/tasks/create-liveview.md"
+
+  - id: debugging
+    name: "调试 Elixir/Phoenix 应用程序"
+    path: "priv/tasks/debugging.md"
+
+# 项目结构
+directories:
+  stories: "stories/"
+  agents: ".bmad/agents/"
+  workflows: ".bmad/workflows/"
+  checklists: ".bmad/checklists/"
+  tasks: ".bmad/tasks/"
+
+# Git 钩子配置
+git_hooks:
+  pre_commit:
+    enabled: true
+    commands:
+      - "mix format"
+      - "mix compile --warnings-as-errors"
+      - "mix credo --strict"
+    auto_restage: true
+
+  commit_msg:
+    enabled: true
+    rules:
+      - "阻止 Claude Code 署名"
+      - "主题使用祈使语气"
+      - "主题末尾无句号"
+
+  post_checkout:
+    enabled: true
+    reminders:
+      - "检查待处理的迁移"
+      - "如果 mix.lock 已更改，则更新依赖项"
+
+  post_merge:
+    enabled: true
+    reminders:
+      - "如果 mix.exs 已更改，则运行 mix deps.get"
+      - "如果添加了迁移，则运行 mix ecto.migrate"
+
+# 代码质量标准
+quality_standards:
+  test_coverage:
+    minimum: 80
+    target: 90
+    exclude_patterns:
+      - "*/migrations/*"
+      - "*/seeds.exs"
+
+  complexity:
+    max_cyclomatic: 10
+    max_function_lines: 50
+    max_module_lines: 500
+
+  style:
+    formatter: mix_format
+    linter: credo
+    type_checker: dialyzer
+
+# Phoenix 特定配置
+phoenix:
+  contexts:
+    # 定义有界上下文
+    - name: Accounts
+      description: "用户管理、身份验证、授权"
+      schemas:
+        - User
+        - Role
+        - Permission
+
+    - name: Catalog
+      description: "产品管理、分类、库存"
+      schemas:
+        - Product
+        - Category
+        - Inventory
+
+  liveview:
+    default_layout: {MyAppWeb.Layouts, :app}
+    use_streams: true  # 始终优先使用流而不是为集合分配
+    subscribe_when_connected: true
+
+  routing:
+    api_prefix: "/api"
+    admin_prefix: "/admin"
+    live_sessions:
+      - name: :require_authenticated_user
+        on_mount: [{MyAppWeb.UserAuth, :ensure_authenticated}]
+      - name: :current_user
+        on_mount: [{MyAppWeb.UserAuth, :mount_current_user}]
+
+# Ecto 配置
+ecto:
+  migration_naming: "descriptive"  # 使用描述性名称，而不仅仅是 "add_field"
+
+  schema_conventions:
+    timestamps: :utc_datetime
+    primary_key_type: :id  # 或 :binary_id 用于 UUID
+    foreign_key_type: :id  # 或 :binary_id 用于 UUID
+
+  query_optimization:
+    enable_query_logging: true  # 在开发中
+    alert_on_n_plus_one: true
+    preload_associations: "recommended"
+
+# 测试配置
+testing:
+  framework: ex_unit
+  async_tests: true
+  database_mode: sandbox
+
+  test_patterns:
+    unit_tests: "test/**/contexts/**/*_test.exs"
+    integration_tests: "test/**/controllers/**/*_test.exs"
+    liveview_tests: "test/**/live/**/*_test.exs"
+
+  coverage_tool: excoveralls
+  coverage_ignore:
+    - "*/migrations/*"
+    - "*/seeds.exs"
+    - "*/test/support/*"
+
+# 部署配置
+deployment:
+  strategy: releases  # Elixir 发布版本
+  environments:
+    - development
+    - test
+    - staging
+    - production
+
+  health_check:
+    endpoint: "/health"
+    timeout: 5000
+
+  monitoring:
+    tools:
+      - logger
+      - telemetry
+    # 可选：AppSignal、Sentry 等
+
+# 文档
+documentation:
+  generate_docs: true
+  tool: ex_doc
+  format: html
+
+  required_docs:
+    - module_doc: "所有公共模块"
+    - function_doc: "所有公共函数"
+    - examples: "复杂函数"
+
+# 环境特定设置
+environments:
+  development:
+    database:
+      pool_size: 10
+      log: true
+
+    endpoint:
+      debug_errors: true
+      code_reloader: true
+
+  test:
+    database:
+      pool: Ecto.Adapters.SQL.Sandbox
+      pool_size: 10
+
+  production:
+    database:
+      pool_size: 20
+      log: false
+
+    endpoint:
+      cache_static_manifest: "priv/static/cache_manifest.json"
+
+# 自定义项目规则（可选）
+custom_rules:
+  # 在此添加项目特定的约定
+  - "所有 LiveView 模块必须以 'Live' 后缀结尾"
+  - "所有上下文模块在 lib/my_app/[context]/"
+  - "所有模式在 lib/my_app/[context]/[schema].ex"
+  - "所有测试镜像 lib/ 结构"
+  - "在 LiveView 中为所有集合使用流"
+  - "仅在 connected?(socket) 时订阅 PubSub"
+  - "表单始终使用 to_form/1，永远不要将 changeset 传递给模板"
+  - "不允许 N+1 查询 - 使用 preload 或 join"
+
+# 集成设置
+integrations:
+  # 外部服务
+  external_apis:
+    - name: "ElevenLabs"
+      purpose: "用于语音通话的文本转语音"
+      docs: "https://elevenlabs.io/docs"
+
+  # 第三方库
+  key_dependencies:
+    - name: "Phoenix LiveView"
+      version: "~> 0.20"
+      purpose: "实时交互式用户界面"
+
+    - name: "Ecto"
+      version: "~> 3.10"
+      purpose: "数据库包装器和查询 DSL"
+
+    - name: "Oban"
+      version: "~> 2.15"
+      purpose: "后台作业处理"
+      optional: true
+
+# 注释
+notes: |
+  此配置定义了 Elixir/Phoenix 项目的 BMAD 设置。
+
+  关键原则：
+  1. 遵循现有模式 - 永远不要引入新方法
+  2. 测试驱动开发 (TDD) - 先测试，后代码
+  3. 强制执行质量门 - credo、dialyzer、format、测试
+  4. LiveView 最佳实践 - 流、connected?、to_form/1
+  5. Ecto 最佳实践 - preload、约束、索引
+  6. 尊重上下文边界 - 无跨上下文查询
+
+  工作流：
+  1. 创建故事 (elixir-sm)
+  2. 实现功能 (elixir-dev)
+  3. 运行质量门 (elixir-qa)
+  4. 部署到暂存环境
+  5. 产品所有者验收
+  6. 部署到生产环境
