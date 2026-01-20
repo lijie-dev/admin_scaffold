@@ -72,6 +72,7 @@ defmodule AdminScaffoldWeb.Router do
     end
 
     post "/users/log-in", UserSessionController, :create
+    post "/users/register", UserSessionController, :register
     delete "/users/log-out", UserSessionController, :delete
   end
 end
