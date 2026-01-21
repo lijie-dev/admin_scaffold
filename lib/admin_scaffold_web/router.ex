@@ -54,6 +54,7 @@ defmodule AdminScaffoldWeb.Router do
       live "/dashboard", DashboardLive.Index, :index
       live "/admin/users", UserLive.Index, :index
       live "/admin/users/:id", UserLive.Show, :show
+      live "/admin/users/:id/edit", UserLive.Index, :edit
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
 

@@ -8,6 +8,7 @@ defmodule AdminScaffold.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :status, :string, default: "active"
 
     many_to_many :roles, AdminScaffold.Accounts.Role, join_through: "user_roles"
 
@@ -42,6 +43,20 @@ defmodule AdminScaffold.Accounts.User do
     |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  @doc """
+  A user changeset for updating user information.
+
+  Allows updating email and status fields.
+  """
+  def update_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :status])
+    |> validate_required([:email, :status])
+    |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/)
+    |> validate_inclusion(:status, ["active", "inactive"])
+    |> unique_constraint(:email)
   end
 
   @doc """

@@ -17,7 +17,10 @@
       "WebSearch",
       "Skill(ui-ux-pro-max)",
       "Skill(ui-ux-pro-max:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

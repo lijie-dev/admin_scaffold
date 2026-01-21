@@ -49,16 +49,16 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
   def render(assigns) do
     ~H"""
     <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="brutal-card p-8 mb-8 fade-in-stagger" style="background: var(--color-bg-card);">
+      <!-- Header - SaaS Style -->
+      <div class="bg-white p-8 mb-8 rounded-xl shadow-sm border border-slate-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex-1">
-            <h1 class="text-4xl font-black mb-2 text-glitch" data-text="权限管理" style="font-family: var(--font-display); color: var(--color-text-primary);">
+            <h1 class="text-4xl font-bold mb-2 text-slate-900">
               权限管理
             </h1>
-            <p class="text-lg flex items-center gap-2" style="color: var(--color-text-secondary); font-family: var(--font-body);">
+            <p class="text-lg flex items-center gap-2 text-slate-600">
               配置系统权限和访问控制
-              <span class="px-3 py-1 brutal-btn text-xs" style="background: var(--color-accent-orange); color: #000; font-family: var(--font-display);">
+              <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
                 ACL
               </span>
             </p>
@@ -66,8 +66,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
           <div class="flex gap-3">
             <.link
               navigate={~p"/dashboard"}
-              class="brutal-btn px-6 py-3 text-white font-bold flex items-center gap-2"
-              style="background: var(--color-bg-elevated); font-family: var(--font-display);"
+              class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -76,8 +75,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
             </.link>
             <.link
               patch={~p"/admin/permissions/new"}
-              class="brutal-btn px-6 py-3 text-white font-bold flex items-center gap-2"
-              style="background: var(--color-accent-orange); font-family: var(--font-display);"
+              class="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -93,32 +91,31 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
         <div
           :for={{dom_id, permission} <- @streams.permissions}
           id={dom_id}
-          class="brutal-card p-4 fade-in-stagger hover:scale-105 transition-all"
-          style="background: var(--color-bg-card); border-color: var(--color-accent-orange);"
+          class="bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-all p-6"
         >
           <!-- Permission Icon -->
           <div class="mb-4 flex justify-center">
-            <div class="w-16 h-16 brutal-btn flex items-center justify-center" style="background: var(--color-accent-orange); color: #000;">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
           </div>
 
           <!-- Permission Name -->
-          <h3 class="text-lg font-black mb-2 text-center" style="font-family: var(--font-display); color: var(--color-text-primary);">
+          <h3 class="text-lg font-semibold mb-2 text-center text-slate-900">
             <%= permission.name %>
           </h3>
 
           <!-- Permission Slug -->
-          <div class="mb-3 p-2 text-center" style="background: var(--color-bg-elevated);">
-            <p class="text-xs font-bold" style="color: var(--color-accent-orange); font-family: var(--font-mono);">
+          <div class="mb-3 p-2 text-center bg-slate-50 rounded-lg">
+            <p class="text-xs font-mono text-orange-600">
               <%= permission.slug %>
             </p>
           </div>
 
           <!-- Permission Description -->
-          <p class="text-xs mb-4 text-center min-h-[2.5rem]" style="color: var(--color-text-muted); font-family: var(--font-body);">
+          <p class="text-xs mb-4 text-center min-h-[2.5rem] text-slate-600">
             <%= permission.description || "暂无描述" %>
           </p>
 
@@ -126,8 +123,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
           <div class="flex gap-2">
             <.link
               patch={~p"/admin/permissions/#{permission}/edit"}
-              class="flex-1 brutal-btn px-3 py-2 text-white font-bold text-center text-xs"
-              style="background: var(--color-primary); font-family: var(--font-display);"
+              class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-center text-xs rounded-lg transition-colors"
             >
               编辑
             </.link>
@@ -135,8 +131,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
               phx-click="delete"
               phx-value-id={permission.id}
               data-confirm="确定要删除这个权限吗？"
-              class="brutal-btn px-3 py-2 text-white font-bold text-xs"
-              style="background: var(--color-accent-pink); font-family: var(--font-display);"
+              class="px-3 py-2 bg-pink-600 hover:bg-pink-700 text-white font-medium text-xs rounded-lg transition-colors"
             >
               删除
             </button>
@@ -147,26 +142,24 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
       <!-- Empty State -->
       <div
         :if={@streams.permissions.inserts == []}
-        class="brutal-card p-12 text-center fade-in-stagger"
-        style="background: var(--color-bg-card);"
+        class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center"
       >
-        <div class="w-24 h-24 mx-auto mb-6 brutal-card pattern-stripes" style="background: var(--color-accent-orange);">
+        <div class="w-24 h-24 mx-auto mb-6 bg-orange-100 rounded-xl flex items-center justify-center">
           <div class="w-full h-full flex items-center justify-center">
-            <svg class="w-12 h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
         </div>
-        <h3 class="text-2xl font-black mb-2" style="font-family: var(--font-display); color: var(--color-text-primary);">
+        <h3 class="text-2xl font-semibold mb-2 text-slate-900">
           暂无权限
         </h3>
-        <p class="mb-6" style="color: var(--color-text-secondary); font-family: var(--font-body);">
+        <p class="mb-6 text-slate-600">
           点击上方"新建权限"按钮创建第一个权限
         </p>
         <.link
           patch={~p"/admin/permissions/new"}
-          class="brutal-btn px-8 py-3 text-white font-bold inline-flex items-center gap-2"
-          style="background: var(--color-accent-orange); font-family: var(--font-display);"
+          class="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium inline-flex items-center gap-2 rounded-lg transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
