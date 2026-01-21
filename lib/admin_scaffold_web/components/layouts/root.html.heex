@@ -4,49 +4,222 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="AdminScaffold" suffix=" · Phoenix Framework">
+    <.live_title default="管理后台" suffix=" · 管理系统">
       {assigns[:page_title]}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <link phx-track-static rel="stylesheet" href={~p"/assets/default.css"} />
     <script phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}></script>
+    <script>
+      // Sidebar toggle functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const mobileToggle = document.getElementById('mobile-menu-toggle');
+        const mobileClose = document.getElementById('mobile-menu-close');
+
+        if (toggleBtn && sidebar) {
+          toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+          });
+
+          // Restore sidebar state
+          if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+          }
+        }
+
+        // Mobile menu toggle
+        if (mobileToggle && sidebar) {
+          mobileToggle.addEventListener('click', function() {
+            sidebar.classList.add('mobile-open');
+          });
+        }
+
+        if (mobileClose && sidebar) {
+          mobileClose.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+          });
+        }
+      });
+    </script>
+    <style>
+      /* Neo-Brutalist Design System */
+      :root {
+        --color-primary: #6366f1;
+        --color-secondary: #ec4899;
+        --color-accent: #f59e0b;
+        --color-dark: #0f172a;
+        --color-surface: #1e293b;
+        --shadow-brutal: 4px 4px 0px rgba(0, 0, 0, 0.8);
+        --shadow-brutal-lg: 8px 8px 0px rgba(0, 0, 0, 0.8);
+      }
+
+      #sidebar {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #sidebar.collapsed {
+        width: 5rem;
+      }
+
+      #sidebar.collapsed .nav-text,
+      #sidebar.collapsed .logo-text,
+      #sidebar.collapsed .user-info {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+      }
+
+      #sidebar.collapsed .nav-link {
+        justify-content: center;
+      }
+
+      @media (max-width: 768px) {
+        #sidebar {
+          position: fixed;
+          left: -100%;
+          z-index: 50;
+          transition: left 0.3s ease;
+        }
+
+        #sidebar.mobile-open {
+          left: 0;
+        }
+      }
+
+      .brutal-card {
+        border: 3px solid #000;
+        box-shadow: var(--shadow-brutal);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .brutal-card:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.8);
+      }
+
+      .brutal-btn {
+        border: 2px solid #000;
+        box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+
+      .brutal-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 antialiased">
+  <body class="bg-slate-50 antialiased font-sans">
     <%= if @current_scope do %>
       <div class="min-h-screen flex">
         <!-- 侧边栏 -->
-        <div class="w-64 bg-gray-800 text-white flex flex-col">
-          <div class="p-4 text-xl font-bold border-b border-gray-700">
-            后台管理系统
+        <aside id="sidebar" class="w-64 bg-slate-900 text-white flex flex-col border-r-4 border-black h-screen sticky top-0">
+          <!-- Logo & Brand -->
+          <div class="p-6 border-b-4 border-slate-700 bg-gradient-to-r from-indigo-600 to-purple-600">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-yellow-400 border-3 border-black flex items-center justify-center font-black text-black text-xl">
+                A
+              </div>
+              <span class="logo-text text-xl font-black tracking-tight transition-all duration-300">管理系统</span>
+            </div>
           </div>
-          <nav class="flex-1 p-4 space-y-2">
-            <.link navigate={~p"/dashboard"} class="block px-4 py-2 rounded hover:bg-gray-700">
-              仪表板
+
+          <!-- Navigation -->
+          <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <.link navigate={~p"/dashboard"} class="nav-link flex items-center gap-3 px-4 py-3 rounded-none bg-slate-800 hover:bg-indigo-600 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-400 group">
+              <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span class="nav-text font-bold transition-all duration-300">仪表板</span>
             </.link>
-            <.link navigate={~p"/admin/users"} class="block px-4 py-2 rounded hover:bg-gray-700">
-              用户管理
+
+            <.link navigate={~p"/users"} class="nav-link flex items-center gap-3 px-4 py-3 rounded-none bg-slate-800 hover:bg-pink-600 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-400 group">
+              <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="nav-text font-bold transition-all duration-300">用户管理</span>
             </.link>
-            <.link navigate={~p"/admin/roles"} class="block px-4 py-2 rounded hover:bg-gray-700">
-              角色管理
-            </.link>
-            <.link navigate={~p"/admin/permissions"} class="block px-4 py-2 rounded hover:bg-gray-700">
-              权限管理
+
+            <.link navigate={~p"/users/settings"} class="nav-link flex items-center gap-3 px-4 py-3 rounded-none bg-slate-800 hover:bg-amber-600 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-400 group">
+              <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="nav-text font-bold transition-all duration-300">系统设置</span>
             </.link>
           </nav>
-        </div>
+
+          <!-- User Info & Toggle -->
+          <div class="p-4 border-t-4 border-slate-700 bg-slate-800">
+            <div class="user-info mb-3 transition-all duration-300">
+              <div class="flex items-center gap-3 px-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center font-bold border-2 border-black">
+                  {String.first(@current_scope.user.email) |> String.upcase()}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold truncate">{@current_scope.user.email}</p>
+                  <p class="text-xs text-slate-400">在线</p>
+                </div>
+              </div>
+            </div>
+            <button id="sidebar-toggle" class="w-full brutal-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        </aside>
 
         <!-- 主内容区 -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col min-w-0">
           <!-- 顶部导航栏 -->
-          <header class="bg-white shadow">
+          <header class="bg-white border-b-4 border-black sticky top-0 z-40">
             <div class="flex items-center justify-between px-6 py-4">
-              <h2 class="text-xl font-semibold text-gray-800">{assigns[:page_title] || "管理后台"}</h2>
+              <!-- Mobile Menu Toggle & Breadcrumb -->
               <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-600">{@current_scope.user.email}</span>
-                <.link href={~p"/users/settings"} class="text-sm text-indigo-600 hover:text-indigo-800">
+                <button id="mobile-menu-toggle" class="md:hidden brutal-btn bg-slate-800 text-white p-2">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <div class="flex items-center gap-2 text-sm">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <span class="text-slate-600 font-medium">管理后台</span>
+                  <span class="text-slate-400">/</span>
+                  <span class="font-black text-slate-900">{assigns[:page_title] || "首页"}</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-3">
+                <!-- Search -->
+                <button class="hidden md:flex brutal-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span class="text-sm font-bold">搜索</span>
+                </button>
+
+                <!-- Notifications -->
+                <button class="brutal-btn bg-yellow-400 hover:bg-yellow-500 text-black p-2 relative">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-black rounded-full text-xs font-bold text-white flex items-center justify-center">3</span>
+                </button>
+
+                <!-- Settings -->
+                <.link href={~p"/users/settings"} class="brutal-btn bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 font-bold text-sm">
                   设置
                 </.link>
-                <.link href={~p"/users/log-out"} method="delete" class="text-sm text-red-600 hover:text-red-800">
+
+                <!-- Logout -->
+                <.link href={~p"/users/log-out"} method="delete" class="brutal-btn bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 font-bold text-sm">
                   退出
                 </.link>
               </div>
@@ -54,15 +227,33 @@
           </header>
 
           <!-- 页面内容 -->
-          <main class="flex-1 overflow-y-auto">
+          <main class="flex-1 overflow-y-auto bg-slate-50 p-6">
+            <Layouts.flash_group flash={@flash} />
             {@inner_content}
           </main>
         </div>
       </div>
     <% else %>
-      <div class="min-h-screen flex items-center justify-center">
-        {@inner_content}
+      <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500 rounded-full blur-3xl"></div>
+        </div>
+        <div class="relative z-10">
+          {@inner_content}
+        </div>
       </div>
     <% end %>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+    <!-- Close button for mobile sidebar -->
+    <button id="mobile-menu-close" class="fixed top-4 right-4 z-50 brutal-btn bg-red-500 text-white p-2 hidden md:hidden">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
   </body>
 </html>
