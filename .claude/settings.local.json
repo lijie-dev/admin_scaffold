@@ -9,7 +9,15 @@
       "Bash(mix ecto.migrate:*)",
       "Bash(mix compile:*)",
       "Bash(mix phx.server:*)",
-      "Skill(frontend-design)"
+      "Skill(frontend-design)",
+      "Bash(mix clean:*)",
+      "Bash(mix assets.build:*)",
+      "Bash(mix phx.digest.clean:*)",
+      "Bash(mix assets.deploy:*)",
+      "WebSearch",
+      "Skill(ui-ux-pro-max)",
+      "Skill(ui-ux-pro-max:*)",
+      "Bash(python3:*)"
     ]
   }
 }

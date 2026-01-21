@@ -66,6 +66,11 @@ defmodule AdminScaffoldWeb.Router do
       live "/admin/permissions", PermissionLive.Index, :index
       live "/admin/permissions/new", PermissionLive.Index, :new
       live "/admin/permissions/:id/edit", PermissionLive.Index, :edit
+
+      # 菜单管理
+      live "/admin/menus", MenuLive.Index, :index
+      live "/admin/menus/new", MenuLive.Index, :new
+      live "/admin/menus/:id/edit", MenuLive.Index, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password
