@@ -74,6 +74,9 @@ defmodule AdminScaffoldWeb.Router do
       live "/admin/menus/new", MenuLive.Index, :new
       live "/admin/menus/:id/edit", MenuLive.Index, :edit
 
+      # 审计日志
+      live "/admin/audit-logs", AuditLogLive.Index, :index
+
       # 页面构建器示例
       live "/admin/page-builder/example", PageLive.Example, :index
     end

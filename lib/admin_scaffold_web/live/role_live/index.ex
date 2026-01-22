@@ -3,9 +3,12 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
 
   alias AdminScaffold.Accounts
   alias AdminScaffold.Accounts.Role
+  alias AdminScaffoldWeb.Authorization
 
   @impl true
   def mount(_params, _session, socket) do
+    socket = Authorization.require_permission(socket, "roles.manage")
+
     roles =
       Accounts.list_roles()
       |> Enum.map(&preload_role_associations/1)

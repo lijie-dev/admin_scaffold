@@ -3,9 +3,11 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
 
   alias AdminScaffold.Accounts
   alias AdminScaffold.Accounts.Permission
+  alias AdminScaffoldWeb.Authorization
 
   @impl true
   def mount(_params, _session, socket) do
+    socket = Authorization.require_permission(socket, "permissions.manage")
     {:ok, stream(socket, :permissions, Accounts.list_permissions())}
   end
 

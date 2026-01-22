@@ -7,6 +7,7 @@ defmodule AdminScaffold.Accounts do
   alias AdminScaffold.Repo
 
   alias AdminScaffold.Accounts.{User, UserToken, UserNotifier, Role, Permission, Menu}
+  alias AdminScaffold.System
 
   ## Database getters
 
@@ -33,7 +34,9 @@ defmodule AdminScaffold.Accounts do
 
   """
   def list_users do
-    Repo.all(User)
+    User
+    |> preload(:roles)
+    |> Repo.all()
   end
 
   @doc """
@@ -98,10 +101,17 @@ defmodule AdminScaffold.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user, attrs) do
-    user
-    |> User.update_changeset(attrs)
-    |> Repo.update()
+  def update_user(%User{} = user, attrs, current_user \\ nil, metadata \\ %{}) do
+    case user
+         |> User.update_changeset(attrs)
+         |> Repo.update() do
+      {:ok, updated_user} = result ->
+        System.log_action(current_user, "update", "User", updated_user.id, attrs, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -116,8 +126,15 @@ defmodule AdminScaffold.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
+  def delete_user(%User{} = user, current_user \\ nil, metadata \\ %{}) do
+    case Repo.delete(user) do
+      {:ok, deleted_user} = result ->
+        System.log_action(current_user, "delete", "User", deleted_user.id, %{email: deleted_user.email}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   ## User registration
@@ -147,10 +164,17 @@ defmodule AdminScaffold.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+  def register_user(attrs, metadata \\ %{}) do
+    case %User{}
+         |> User.registration_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} = result ->
+        System.log_action(nil, "create", "User", user.id, %{email: user.email}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   ## Settings
@@ -374,7 +398,9 @@ defmodule AdminScaffold.Accounts do
   Returns the list of roles.
   """
   def list_roles do
-    Repo.all(Role)
+    Role
+    |> preload([:permissions, :menus])
+    |> Repo.all()
   end
 
   @doc """
@@ -385,26 +411,47 @@ defmodule AdminScaffold.Accounts do
   @doc """
   Creates a role.
   """
-  def create_role(attrs \\ %{}) do
-    %Role{}
-    |> Role.changeset(attrs)
-    |> Repo.insert()
+  def create_role(attrs \\ %{}, current_user \\ nil, metadata \\ %{}) do
+    case %Role{}
+         |> Role.changeset(attrs)
+         |> Repo.insert() do
+      {:ok, role} = result ->
+        System.log_action(current_user, "create", "Role", role.id, %{name: role.name}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
   Updates a role.
   """
-  def update_role(%Role{} = role, attrs) do
-    role
-    |> Role.changeset(attrs)
-    |> Repo.update()
+  def update_role(%Role{} = role, attrs, current_user \\ nil, metadata \\ %{}) do
+    case role
+         |> Role.changeset(attrs)
+         |> Repo.update() do
+      {:ok, updated_role} = result ->
+        System.log_action(current_user, "update", "Role", updated_role.id, attrs, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
   Deletes a role.
   """
-  def delete_role(%Role{} = role) do
-    Repo.delete(role)
+  def delete_role(%Role{} = role, current_user \\ nil, metadata \\ %{}) do
+    case Repo.delete(role) do
+      {:ok, deleted_role} = result ->
+        System.log_action(current_user, "delete", "Role", deleted_role.id, %{name: deleted_role.name}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -473,26 +520,47 @@ defmodule AdminScaffold.Accounts do
   @doc """
   Creates a permission.
   """
-  def create_permission(attrs \\ %{}) do
-    %Permission{}
-    |> Permission.changeset(attrs)
-    |> Repo.insert()
+  def create_permission(attrs \\ %{}, current_user \\ nil, metadata \\ %{}) do
+    case %Permission{}
+         |> Permission.changeset(attrs)
+         |> Repo.insert() do
+      {:ok, permission} = result ->
+        System.log_action(current_user, "create", "Permission", permission.id, %{name: permission.name, slug: permission.slug}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
   Updates a permission.
   """
-  def update_permission(%Permission{} = permission, attrs) do
-    permission
-    |> Permission.changeset(attrs)
-    |> Repo.update()
+  def update_permission(%Permission{} = permission, attrs, current_user \\ nil, metadata \\ %{}) do
+    case permission
+         |> Permission.changeset(attrs)
+         |> Repo.update() do
+      {:ok, updated_permission} = result ->
+        System.log_action(current_user, "update", "Permission", updated_permission.id, attrs, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
   Deletes a permission.
   """
-  def delete_permission(%Permission{} = permission) do
-    Repo.delete(permission)
+  def delete_permission(%Permission{} = permission, current_user \\ nil, metadata \\ %{}) do
+    case Repo.delete(permission) do
+      {:ok, deleted_permission} = result ->
+        System.log_action(current_user, "delete", "Permission", deleted_permission.id, %{name: deleted_permission.name, slug: deleted_permission.slug}, metadata)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -546,5 +614,97 @@ defmodule AdminScaffold.Accounts do
   """
   def change_menu(%Menu{} = menu, attrs \\ %{}) do
     Menu.changeset(menu, attrs)
+  end
+
+  ## Authorization functions
+
+  @doc """
+  Gets all permissions for a user through their roles.
+
+  ## Examples
+
+      iex> get_user_permissions(user_id)
+      [%Permission{slug: "users.manage"}, ...]
+
+  """
+  def get_user_permissions(user_id) do
+    from(p in Permission,
+      join: rp in "role_permissions",
+      on: p.id == rp.permission_id,
+      join: ur in "user_roles",
+      on: rp.role_id == ur.role_id,
+      where: ur.user_id == ^user_id,
+      distinct: true
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Checks if a user has a specific permission.
+
+  ## Examples
+
+      iex> has_permission?(user, "users.manage")
+      true
+
+      iex> has_permission?(user, "admin.settings")
+      false
+
+  """
+  def has_permission?(%User{id: user_id}, permission_slug) when is_binary(permission_slug) do
+    from(p in Permission,
+      join: rp in "role_permissions",
+      on: p.id == rp.permission_id,
+      join: ur in "user_roles",
+      on: rp.role_id == ur.role_id,
+      where: ur.user_id == ^user_id and p.slug == ^permission_slug
+    )
+    |> Repo.exists?()
+  end
+
+  def has_permission?(nil, _permission_slug), do: false
+
+  @doc """
+  Checks if a user can access a specific menu path.
+
+  ## Examples
+
+      iex> can_access_menu?(user, "/admin/users")
+      true
+
+  """
+  def can_access_menu?(%User{id: user_id}, menu_path) when is_binary(menu_path) do
+    from(m in Menu,
+      join: rm in "role_menus",
+      on: m.id == rm.menu_id,
+      join: ur in "user_roles",
+      on: rm.role_id == ur.role_id,
+      where: ur.user_id == ^user_id and m.path == ^menu_path
+    )
+    |> Repo.exists?()
+  end
+
+  def can_access_menu?(nil, _menu_path), do: false
+
+  @doc """
+  Gets all accessible menus for a user through their roles.
+
+  ## Examples
+
+      iex> get_user_menus(user_id)
+      [%Menu{name: "用户管理", path: "/admin/users"}, ...]
+
+  """
+  def get_user_menus(user_id) do
+    from(m in Menu,
+      join: rm in "role_menus",
+      on: m.id == rm.menu_id,
+      join: ur in "user_roles",
+      on: rm.role_id == ur.role_id,
+      where: ur.user_id == ^user_id and m.status == :active,
+      distinct: true,
+      order_by: [asc: m.sort]
+    )
+    |> Repo.all()
   end
 end

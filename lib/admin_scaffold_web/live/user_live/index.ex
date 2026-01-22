@@ -2,9 +2,11 @@ defmodule AdminScaffoldWeb.UserLive.Index do
   use AdminScaffoldWeb, :live_view
 
   alias AdminScaffold.Accounts
+  alias AdminScaffoldWeb.Authorization
 
   @impl true
   def mount(_params, _session, socket) do
+    socket = Authorization.require_permission(socket, "users.manage")
     {:ok, stream(socket, :users, Accounts.list_users())}
   end
 
