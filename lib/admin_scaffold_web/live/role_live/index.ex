@@ -6,7 +6,17 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :roles, Accounts.list_roles())}
+    roles =
+      Accounts.list_roles()
+      |> Enum.map(&preload_role_associations/1)
+
+    {:ok, stream(socket, :roles, roles)}
+  end
+
+  defp preload_role_associations(role) do
+    role
+    |> AdminScaffold.Repo.preload(:permissions)
+    |> AdminScaffold.Repo.preload(:menus)
   end
 
   @impl true
@@ -127,6 +137,22 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
               </svg>
               <%= Calendar.strftime(role.inserted_at, "%Y-%m-%d") %>
             </div>
+          </div>
+
+          <!-- Permissions and Menus Count -->
+          <div class="flex gap-3 mb-4">
+            <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <%= Enum.count(role.permissions || []) %> 个权限
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+              </svg>
+              <%= Enum.count(role.menus || []) %> 个菜单
+            </span>
           </div>
 
           <!-- Actions -->

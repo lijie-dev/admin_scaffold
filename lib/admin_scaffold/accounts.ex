@@ -414,6 +414,48 @@ defmodule AdminScaffold.Accounts do
     Role.changeset(role, attrs)
   end
 
+  @doc """
+  Gets the list of permission IDs for a role.
+  """
+  def get_role_permission_ids(role_id) do
+    role = get_role!(role_id) |> Repo.preload(:permissions)
+    Enum.map(role.permissions, & &1.id)
+  end
+
+  @doc """
+  Gets the list of menu IDs for a role.
+  """
+  def get_role_menu_ids(role_id) do
+    role = get_role!(role_id) |> Repo.preload(:menus)
+    Enum.map(role.menus, & &1.id)
+  end
+
+  @doc """
+  Updates the permissions associated with a role.
+  """
+  def update_role_permissions(role, permission_ids) do
+    role = role |> Repo.preload(:permissions)
+    permissions = Repo.all(from p in Permission, where: p.id in ^permission_ids)
+
+    role
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:permissions, permissions)
+    |> Repo.update()
+  end
+
+  @doc """
+  Updates the menus associated with a role.
+  """
+  def update_role_menus(role, menu_ids) do
+    role = role |> Repo.preload(:menus)
+    menus = Repo.all(from m in Menu, where: m.id in ^menu_ids)
+
+    role
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:menus, menus)
+    |> Repo.update()
+  end
+
   ## Permission functions
 
   @doc """
