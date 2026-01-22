@@ -26,7 +26,11 @@
       "Bash(mix ecto.reset:*)",
       "Bash(psql:*)",
       "Bash(mix run:*)",
-      "Bash(mix ecto.drop:*)"
+      "Bash(mix ecto.drop:*)",
+      "Skill(browser)",
+      "Bash(node:*)",
+      "Bash(mix test:*)",
+      "Bash(mix format:*)"
     ]
   }
 }

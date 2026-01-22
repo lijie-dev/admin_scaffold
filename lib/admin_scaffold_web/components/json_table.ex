@@ -53,9 +53,9 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
       <div class="p-6 border-b border-slate-200">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold flex items-center gap-3 text-slate-900">
-            <span class="w-1 h-6 bg-blue-600 rounded"></span>
-            <%= @config["title"] || "数据列表" %>
+            <span class="w-1 h-6 bg-blue-600 rounded"></span> {@config["title"] || "数据列表"}
           </h2>
+          
           <div class="flex items-center gap-2">
             <%= if @config["searchable"] do %>
               <div class="relative">
@@ -65,15 +65,24 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
                   class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   phx-blur={JS.dispatch("search", detail: %{value: ""})}
                 />
-                <svg class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
             <% end %>
           </div>
         </div>
       </div>
-
       <!-- Table Content -->
       <div class="overflow-x-auto">
         <table class="min-w-full">
@@ -81,17 +90,22 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
             <tr>
               <%= if @config["batch_actions"] do %>
                 <th class="px-6 py-3 text-left">
-                  <input type="checkbox" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
+                  <input
+                    type="checkbox"
+                    class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                  />
                 </th>
               <% end %>
+              
               <%= for column <- get_columns(@config) do %>
                 <th
                   class="text-left px-6 py-3 text-xs font-medium text-slate-600 uppercase tracking-wider"
                   style={width_style(column)}
                 >
-                  <%= column["label"] %>
+                  {column["label"]}
                 </th>
               <% end %>
+              
               <%= if has_actions?(@config) do %>
                 <th class="text-right px-6 py-3 text-xs font-medium text-slate-600 uppercase tracking-wider">
                   操作
@@ -99,19 +113,23 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
               <% end %>
             </tr>
           </thead>
+          
           <tbody class="bg-white divide-y divide-slate-200">
             <%= for row <- @rows do %>
               <tr class="group hover:bg-slate-50 transition-colors">
                 <%= if @config["batch_actions"] do %>
                   <td class="px-6 py-4">
-                    <input type="checkbox" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    />
                   </td>
                 <% end %>
+                
                 <%= for column <- get_columns(@config) do %>
-                  <td class="px-6 py-4">
-                    <.render_cell row={row} column={column} />
-                  </td>
+                  <td class="px-6 py-4"><.render_cell row={row} column={column} /></td>
                 <% end %>
+                
                 <%= if has_actions?(@config) do %>
                   <td class="px-6 py-4 text-right">
                     <.render_actions row={row} actions={get_actions(@config)} />
@@ -122,19 +140,22 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
           </tbody>
         </table>
       </div>
-
       <!-- Table Footer -->
       <div class="p-6 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-slate-500 text-sm">
-          共 <%= length(@rows) %> 条记录
-        </div>
+        <div class="flex items-center gap-2 text-slate-500 text-sm">共 {length(@rows)} 条记录</div>
+        
         <%= if @config["pagination"] do %>
           <div class="flex items-center gap-2">
-            <button class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm disabled:opacity-50" disabled>
+            <button
+              class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm disabled:opacity-50"
+              disabled
+            >
               上一页
-            </button>
-            <span class="text-sm text-slate-600">第 1 页</span>
-            <button class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm disabled:opacity-50" disabled>
+            </button> <span class="text-sm text-slate-600">第 1 页</span>
+            <button
+              class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm disabled:opacity-50"
+              disabled
+            >
               下一页
             </button>
           </div>
@@ -178,15 +199,16 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
     assigns = assign(assigns, :value, value)
 
     ~H"""
-    <span class="text-slate-900">
-      <%= @value %>
-    </span>
+    <span class="text-slate-900">{@value}</span>
     """
   end
 
   defp badge_cell(assigns) do
     raw_value = get_value(assigns.row, assigns.column["name"])
-    config = get_in(assigns.column, ["map", raw_value]) || %{"text" => raw_value, "color" => "gray"}
+
+    config =
+      get_in(assigns.column, ["map", raw_value]) || %{"text" => raw_value, "color" => "gray"}
+
     assigns = assign(assigns, :config, config)
 
     colors = %{
@@ -204,7 +226,7 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
 
     ~H"""
     <span class={"px-3 py-1 text-xs font-semibold rounded-full #{@color_class}"}>
-      <%= @config["text"] %>
+      {@config["text"]}
     </span>
     """
   end
@@ -219,9 +241,7 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
     assigns = assign(assigns, :formatted, formatted)
 
     ~H"""
-    <span class="text-slate-600">
-      <%= @formatted %>
-    </span>
+    <span class="text-slate-600">{@formatted}</span>
     """
   end
 
@@ -235,7 +255,7 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
       href={@href}
       class="text-blue-600 hover:text-blue-700 font-medium hover:underline"
     >
-      <%= @value %>
+      {@value}
     </a>
     """
   end
@@ -260,9 +280,7 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
     assigns = assigns |> assign(:render_fn, render_fn) |> assign(:value, value)
 
     ~H"""
-    <span class="text-slate-900">
-      <%= if @render_fn, do: @render_fn.(@value, @row), else: @value %>
-    </span>
+    <span class="text-slate-900">{if @render_fn, do: @render_fn.(@value, @row), else: @value}</span>
     """
   end
 
@@ -292,14 +310,14 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
           patch={build_action_path(@row, @action)}
           class={button_class(@action, @primary)}
         >
-          <%= @action["label"] %>
+          {@action["label"]}
         </.link>
       <% "navigate" -> %>
         <.link
           navigate={build_action_path(@row, @action)}
           class={button_class(@action, @primary)}
         >
-          <%= @action["label"] %>
+          {@action["label"]}
         </.link>
       <% "button" -> %>
         <button
@@ -308,14 +326,14 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
           data-confirm={if @action["confirm"], do: "确定要执行此操作吗？"}
           class={button_class(@action, @primary)}
         >
-          <%= @action["label"] %>
+          {@action["label"]}
         </button>
       <% _ -> %>
         <.link
           patch={build_action_path(@row, @action)}
           class={button_class(@action, @primary)}
         >
-          <%= @action["label"] %>
+          {@action["label"]}
         </.link>
     <% end %>
     """
@@ -346,7 +364,8 @@ defmodule AdminScaffoldWeb.Components.JsonTable do
   end
 
   defp button_class(action, primary?) do
-    base = "px-4 py-2 font-medium rounded-lg inline-flex items-center gap-2 text-sm transition-colors"
+    base =
+      "px-4 py-2 font-medium rounded-lg inline-flex items-center gap-2 text-sm transition-colors"
 
     color_class =
       cond do

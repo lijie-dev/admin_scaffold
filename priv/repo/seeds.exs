@@ -28,7 +28,8 @@ defmodule AdminScaffold.Seeds do
     unless Repo.get_by(Accounts.User, email: "admin@admin.com") do
       Accounts.register_user(%{
         email: "admin@admin.com",
-        password: "admin12345678",  # 至少12位
+        # 至少12位
+        password: "admin12345678",
         status: "active"
       })
 
@@ -36,9 +37,12 @@ defmodule AdminScaffold.Seeds do
       case Accounts.get_user_by_email("admin@admin.com") do
         nil ->
           IO.puts("警告: 管理员用户创建失败")
+
         admin ->
-          {:ok, _admin} = AdminScaffold.Accounts.User.confirm_changeset(admin)
-          |> Repo.update()
+          {:ok, _admin} =
+            AdminScaffold.Accounts.User.confirm_changeset(admin)
+            |> Repo.update()
+
           IO.puts("✓ 管理员用户已创建并确认: admin@admin.com")
       end
     end
@@ -100,7 +104,14 @@ defmodule AdminScaffold.Seeds do
       %{name: "仪表板", path: "/dashboard", icon: "dashboard", parent_id: nil, sort: 1, status: 1},
       %{name: "用户管理", path: "/admin/users", icon: "users", parent_id: nil, sort: 2, status: 1},
       %{name: "角色管理", path: "/admin/roles", icon: "roles", parent_id: nil, sort: 3, status: 1},
-      %{name: "权限管理", path: "/admin/permissions", icon: "permissions", parent_id: nil, sort: 4, status: 1},
+      %{
+        name: "权限管理",
+        path: "/admin/permissions",
+        icon: "permissions",
+        parent_id: nil,
+        sort: 4,
+        status: 1
+      },
       %{name: "菜单管理", path: "/admin/menus", icon: "menus", parent_id: nil, sort: 5, status: 1}
     ]
 
@@ -122,7 +133,8 @@ defmodule AdminScaffold.Seeds do
         title: "产品管理",
         slug: "products",
         type: "list",
-        icon: "M20 7l-8-4m8 4v10l-8 4m8 4v6a2 2 0 002-2h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2z",
+        icon:
+          "M20 7l-8-4m8 4v10l-8 4m8 4v6a2 2 0 002-2h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2z",
         status: "active",
         sort: 1,
         config: %{
@@ -130,10 +142,15 @@ defmodule AdminScaffold.Seeds do
           "columns" => [
             %{"name" => "id", "label" => "ID", "type" => "text"},
             %{"name" => "name", "label" => "产品名称", "type" => "text"},
-            %{"name" => "status", "label" => "状态", "type" => "badge", "map" => %{
-              "active" => %{"text" => "在售", "color" => "green"},
-              "inactive" => %{"text" => "下架", "color" => "gray"}
-            }},
+            %{
+              "name" => "status",
+              "label" => "状态",
+              "type" => "badge",
+              "map" => %{
+                "active" => %{"text" => "在售", "color" => "green"},
+                "inactive" => %{"text" => "下架", "color" => "gray"}
+              }
+            },
             %{"name" => "price", "label" => "价格", "type" => "text"}
           ]
         }

@@ -7,8 +7,8 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
   def render(assigns) do
     ~H"""
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-6 text-slate-900"><%= @title %></h2>
-
+      <h2 class="text-2xl font-bold mb-6 text-slate-900">{@title}</h2>
+      
       <.form
         for={@form}
         id="user-form"
@@ -29,10 +29,9 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
             required
           />
           <.error :for={msg <- @form[:email].errors}>
-            <span class="text-sm text-red-600 mt-1"><%= msg %></span>
+            <span class="text-sm text-red-600 mt-1">{msg}</span>
           </.error>
         </div>
-
         <!-- Status Field -->
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-2">状态</label>
@@ -41,18 +40,16 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
             class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             required
           >
-            <option value="active" selected={@form[:status].value == "active"}>
-              启用 (Active)
-            </option>
+            <option value="active" selected={@form[:status].value == "active"}>启用 (Active)</option>
+            
             <option value="inactive" selected={@form[:status].value == "inactive"}>
               禁用 (Inactive)
             </option>
           </select>
           <.error :for={msg <- @form[:status].errors}>
-            <span class="text-sm text-red-600 mt-1"><%= msg %></span>
+            <span class="text-sm text-red-600 mt-1">{msg}</span>
           </.error>
         </div>
-
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
           <button

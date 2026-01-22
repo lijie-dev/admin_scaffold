@@ -7,8 +7,8 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
   def render(assigns) do
     ~H"""
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4"><%= @title %></h2>
-
+      <h2 class="text-2xl font-bold mb-4">{@title}</h2>
+      
       <.form
         for={@form}
         id="role-form"
@@ -27,16 +27,15 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
             required
           />
         </div>
-
+        
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
-          <textarea
+          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label> <textarea
             name="role[description]"
             class="w-full px-3 py-2 border border-gray-300 rounded-md"
             rows="3"
           ><%= @form[:description].value %></textarea>
         </div>
-
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
           <select
@@ -45,10 +44,10 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
             required
           >
             <option value="1" selected={@form[:status].value == 1}>启用</option>
+            
             <option value="0" selected={@form[:status].value == 0}>禁用</option>
           </select>
         </div>
-
         <!-- Permissions Section -->
         <div>
           <label class="text-sm font-medium text-slate-700 mb-2 block">权限配置</label>
@@ -57,7 +56,11 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
               <div :if={Enum.empty?(@permissions)} class="text-sm text-slate-500 py-4 text-center">
                 暂无可用权限
               </div>
-              <div :for={permission <- @permissions} class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded">
+              
+              <div
+                :for={permission <- @permissions}
+                class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded"
+              >
                 <input
                   type="checkbox"
                   name="permissions[]"
@@ -65,17 +68,12 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
                   checked={permission.id in @selected_permission_ids}
                   class="w-4 h-4 text-blue-600 border-slate-300 rounded"
                 />
-                <label class="text-sm text-slate-700 cursor-pointer flex-1">
-                  <%= permission.name %>
-                </label>
-                <span class="text-xs text-slate-500">
-                  <%= permission.code %>
-                </span>
+                <label class="text-sm text-slate-700 cursor-pointer flex-1">{permission.name}</label>
+                <span class="text-xs text-slate-500">{permission.slug}</span>
               </div>
             </div>
           </div>
         </div>
-
         <!-- Menus Section -->
         <div>
           <label class="text-sm font-medium text-slate-700 mb-2 block">菜单配置</label>
@@ -84,6 +82,7 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
               <div :if={Enum.empty?(@menus)} class="text-sm text-slate-500 py-4 text-center">
                 暂无可用菜单
               </div>
+              
               <div :for={menu <- @menus} class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded">
                 <input
                   type="checkbox"
@@ -91,18 +90,13 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
                   value={menu.id}
                   checked={menu.id in @selected_menu_ids}
                   class="w-4 h-4 text-blue-600 border-slate-300 rounded"
-                />
-                <label class="text-sm text-slate-700 cursor-pointer flex-1">
-                  <%= menu.name %>
-                </label>
-                <span class="text-xs text-slate-500">
-                  <%= menu.path %>
-                </span>
+                /> <label class="text-sm text-slate-700 cursor-pointer flex-1">{menu.name}</label>
+                <span class="text-xs text-slate-500">{menu.path}</span>
               </div>
             </div>
           </div>
         </div>
-
+        
         <div class="flex justify-end gap-2">
           <button
             type="submit"

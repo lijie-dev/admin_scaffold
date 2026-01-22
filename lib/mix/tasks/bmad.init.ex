@@ -122,7 +122,9 @@ defmodule Mix.Tasks.Bmad.Init do
 
     case :code.priv_dir(:admin_scaffold) do
       {:error, :bad_name} ->
-        Mix.shell().info("   ⚠ Workflow templates not found (this is expected during development)")
+        Mix.shell().info(
+          "   ⚠ Workflow templates not found (this is expected during development)"
+        )
 
       priv_dir ->
         workflows_src = Path.join(priv_dir, "workflows")
@@ -132,7 +134,9 @@ defmodule Mix.Tasks.Bmad.Init do
           File.cp_r!(workflows_src, workflows_dest)
           Mix.shell().info("   ✓ Copied workflow templates")
         else
-          Mix.shell().info("   ⚠ Workflow templates not found (this is expected during development)")
+          Mix.shell().info(
+            "   ⚠ Workflow templates not found (this is expected during development)"
+          )
         end
     end
   end
@@ -162,7 +166,9 @@ defmodule Mix.Tasks.Bmad.Init do
 
     case :code.priv_dir(:admin_scaffold) do
       {:error, :bad_name} ->
-        Mix.shell().info("   ⚠ Checklist templates not found (this is expected during development)")
+        Mix.shell().info(
+          "   ⚠ Checklist templates not found (this is expected during development)"
+        )
 
       priv_dir ->
         checklists_src = Path.join(priv_dir, "checklists")
@@ -172,7 +178,9 @@ defmodule Mix.Tasks.Bmad.Init do
           File.cp_r!(checklists_src, checklists_dest)
           Mix.shell().info("   ✓ Copied quality checklists")
         else
-          Mix.shell().info("   ⚠ Checklist templates not found (this is expected during development)")
+          Mix.shell().info(
+            "   ⚠ Checklist templates not found (this is expected during development)"
+          )
         end
     end
   end

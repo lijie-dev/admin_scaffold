@@ -104,7 +104,13 @@ defmodule AdminScaffold.CodeGenerator do
     module_name = schema_module |> String.split(".") |> List.last()
     field_defs = generate_schema_fields(schema_fields)
     field_names = schema_fields |> Enum.map(fn f -> ":#{f["name"]}" end) |> Enum.join(", ")
-    required = schema_fields |> Enum.filter(& &1["required"]) |> Enum.map(fn f -> ":#{f["name"]}" end) |> Enum.join(", ")
+
+    required =
+      schema_fields
+      |> Enum.filter(& &1["required"])
+      |> Enum.map(fn f -> ":#{f["name"]}" end)
+      |> Enum.join(", ")
+
     required_str = if required == "", do: "[]", else: "[#{required}]"
 
     """

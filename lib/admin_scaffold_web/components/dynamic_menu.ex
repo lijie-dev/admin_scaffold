@@ -37,7 +37,8 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
   attr :level, :integer, default: 0
 
   def menu_item(assigns) do
-    assigns = assign(assigns, :is_active, String.starts_with?(assigns.current_path, assigns.menu.path))
+    assigns =
+      assign(assigns, :is_active, String.starts_with?(assigns.current_path, assigns.menu.path))
 
     ~H"""
     <div>
@@ -54,11 +55,21 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
           ]}
         >
           <%= if @menu.icon do %>
-            <svg class={["mr-3 flex-shrink-0 h-6 w-6", @is_active && "text-blue-500"]} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icon_path(@menu.icon)} />
+            <svg
+              class={["mr-3 flex-shrink-0 h-6 w-6", @is_active && "text-blue-500"]}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d={icon_path(@menu.icon)}
+              />
             </svg>
           <% end %>
-          <span class="flex-1"><%= @menu.name %></span>
+           <span class="flex-1">{@menu.name}</span>
         </.link>
       <% end %>
     </div>
@@ -86,11 +97,21 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
         ]}
       >
         <%= if @menu.icon do %>
-          <svg class={["mr-3 flex-shrink-0 h-6 w-6", @is_active && "text-blue-500"]} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icon_path(@menu.icon)} />
+          <svg
+            class={["mr-3 flex-shrink-0 h-6 w-6", @is_active && "text-blue-500"]}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d={icon_path(@menu.icon)}
+            />
           </svg>
         <% end %>
-        <span class="flex-1 text-left"><%= @menu.name %></span>
+         <span class="flex-1 text-left">{@menu.name}</span>
         <svg
           id={"chevron-#{@menu.id}"}
           class="ml-3 h-5 w-5 transform transition-transform submenu-chevron-#{@menu.id}"
@@ -128,17 +149,19 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
             <div class="flex-shrink-0 flex items-center">
               <h1 class="text-xl font-bold text-slate-900">Admin Scaffold</h1>
             </div>
+            
             <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
               <%= for menu <- get_top_menus(@current_user) do %>
                 <.link
                   navigate={menu.path}
                   class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                 >
-                  <%= menu.name %>
+                  {menu.name}
                 </.link>
               <% end %>
             </div>
           </div>
+          
           <div class="flex items-center">
             <div class="ml-3 relative">
               <div>
@@ -150,19 +173,27 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
                 >
                   <span class="sr-only">打开用户菜单</span>
                   <div class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                    <%= String.first(@current_user.email) |> String.upcase() %>
+                    {String.first(@current_user.email) |> String.upcase()}
                   </div>
                 </button>
               </div>
+              
               <div
                 id="user-menu-dropdown"
                 phx-clickaway={hide_dropdown("user-menu-dropdown")}
                 class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
               >
-                <.link navigate="/users/settings" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                <.link
+                  navigate="/users/settings"
+                  class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
                   个人设置
                 </.link>
-                <.link navigate="/users/log-out" method="delete" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                <.link
+                  navigate="/users/log-out"
+                  method="delete"
+                  class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
                   退出登录
                 </.link>
               </div>
@@ -191,14 +222,16 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
   end
 
   defp toggle_dropdown(id) do
-    JS.toggle(to: "##{id}",
+    JS.toggle(
+      to: "##{id}",
       in: {"block", "opacity-100", "transform scale-100"},
       out: {"hidden", "opacity-0", "transform scale-95"}
     )
   end
 
   defp hide_dropdown(id) do
-    JS.hide(to: "##{id}",
+    JS.hide(
+      to: "##{id}",
       transition: {"hidden", "opacity-0", "transform scale-95"}
     )
   end
@@ -213,14 +246,16 @@ defmodule AdminScaffoldWeb.Components.DynamicMenu do
         id: "dashboard",
         name: "仪表板",
         path: "/dashboard",
-        icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2",
+        icon:
+          "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2",
         children: []
       },
       %{
         id: "system",
         name: "系统管理",
         path: "#",
-        icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
+        icon:
+          "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
         children: [
           %{id: "users", name: "用户管理", path: "/admin/users", icon: nil, children: []},
           %{id: "roles", name: "角色管理", path: "/admin/roles", icon: nil, children: []},

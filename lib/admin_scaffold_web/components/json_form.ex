@@ -43,6 +43,7 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       <%= for field <- get_fields(@config) do %>
         <.render_field form={@form} field={field} />
       <% end %>
+      
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
         <button
           type="submit"
@@ -94,8 +95,7 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
   defp text_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <input
       type="text"
@@ -105,16 +105,14 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       placeholder={@field["placeholder"]}
       required={@field["required"]}
       {@field["attrs"] || %{}}
-    />
-    <.field_errors form={@form} field_name={@field["name"]} />
+    /> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
   defp email_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <input
       type="email"
@@ -124,16 +122,14 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       placeholder={@field["placeholder"] || "user@example.com"}
       required={@field["required"]}
       {@field["attrs"] || %{}}
-    />
-    <.field_errors form={@form} field_name={@field["name"]} />
+    /> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
   defp password_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <input
       type="password"
@@ -143,16 +139,14 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       placeholder={@field["placeholder"]}
       required={@field["required"]}
       {@field["attrs"] || %{}}
-    />
-    <.field_errors form={@form} field_name={@field["name"]} />
+    /> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
   defp textarea_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <textarea
       name={@form[@field["name"]].name}
@@ -169,8 +163,7 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
   defp select_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <select
       name={@form[@field["name"]].name}
@@ -181,16 +174,16 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       <%= if @field["prompt"] do %>
         <option value="">{@field["prompt"]}</option>
       <% end %>
+      
       <%= for option <- @field["options"] || [] do %>
         <option
           value={option["value"]}
           selected={@form[@field["name"]].value == option["value"]}
         >
-          <%= option["label"] %>
+          {option["label"]}
         </option>
       <% end %>
-    </select>
-    <.field_errors form={@form} field_name={@field["name"]} />
+    </select> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
@@ -204,20 +197,15 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
         checked={@form[@field["name"]].value}
         class="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
         {@field["attrs"] || %{}}
-      />
-      <span class="text-sm font-semibold text-slate-700">
-        <%= @field["label"] %>
-      </span>
-    </label>
-    <.field_errors form={@form} field_name={@field["name"]} />
+      /> <span class="text-sm font-semibold text-slate-700">{@field["label"]}</span>
+    </label> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
   defp number_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <input
       type="number"
@@ -230,16 +218,14 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       max={@field["max"]}
       step={@field["step"]}
       {@field["attrs"] || %{}}
-    />
-    <.field_errors form={@form} field_name={@field["name"]} />
+    /> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
   defp date_input(assigns) do
     ~H"""
     <label class="block text-sm font-semibold text-slate-700 mb-2">
-      <%= @field["label"] %>
-      <%= if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>") %>
+      {@field["label"]} {if @field["required"], do: raw("<span class=\"text-red-500 ml-1\">*</span>")}
     </label>
     <input
       type="date"
@@ -248,8 +234,7 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
       required={@field["required"]}
       {@field["attrs"] || %{}}
-    />
-    <.field_errors form={@form} field_name={@field["name"]} />
+    /> <.field_errors form={@form} field_name={@field["name"]} />
     """
   end
 
@@ -260,9 +245,12 @@ defmodule AdminScaffoldWeb.Components.JsonForm do
     <%= for {msg, _} <- @form[@field_name].errors do %>
       <p class="mt-1 text-sm text-red-600 flex items-center gap-1">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-        </svg>
-        <%= msg %>
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+            clip-rule="evenodd"
+          />
+        </svg> {msg}
       </p>
     <% end %>
     """

@@ -37,7 +37,9 @@ defmodule AdminScaffold.PageBuilder do
   根据类型获取页面列表
   """
   def list_pages_by_type(type) when is_binary(type) do
-    Repo.all(from p in Page, where: p.type == ^type and p.status == "active", order_by: [asc: :sort])
+    Repo.all(
+      from p in Page, where: p.type == ^type and p.status == "active", order_by: [asc: :sort]
+    )
   end
 
   @doc """

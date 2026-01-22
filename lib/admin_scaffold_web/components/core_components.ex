@@ -68,9 +68,10 @@ defmodule AdminScaffoldWeb.CoreComponents do
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
         <div>
           <p :if={@title} class="font-semibold">{@title}</p>
+          
           <p>{msg}</p>
         </div>
-        <div class="flex-1" />
+         <div class="flex-1" />
         <button type="button" class="group self-start cursor-pointer" aria-label={gettext("close")}>
           <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
         </button>
@@ -103,15 +104,11 @@ defmodule AdminScaffoldWeb.CoreComponents do
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
-      <.link class={@class} {@rest}>
-        {render_slot(@inner_block)}
-      </.link>
+      <.link class={@class} {@rest}>{render_slot(@inner_block)}</.link>
       """
     else
       ~H"""
-      <button class={@class} {@rest}>
-        {render_slot(@inner_block)}
-      </button>
+      <button class={@class} {@rest}>{render_slot(@inner_block)}</button>
       """
     end
   end
@@ -244,7 +241,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
           {@rest}
         >
           <option :if={@prompt} value="">{@prompt}</option>
-          {Phoenix.HTML.Form.options_for_select(@options, @value)}
+           {Phoenix.HTML.Form.options_for_select(@options, @value)}
         </select>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
@@ -256,8 +253,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
-        <textarea
+        <span :if={@label} class="label mb-1">{@label}</span> <textarea
           id={@id}
           name={@name}
           class={[
@@ -309,7 +305,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
       id={@id}
       phx-mounted={@show && show(@id)}
       phx-remove={hide(@id)}
-      class="relative z-50 hidden"
+      class={["relative z-50", !@show && "hidden"]}
     >
       <div id={"#{@id}-bg"} class="fixed inset-0 bg-zinc-50/90 transition-opacity" aria-hidden="true" />
       <div
@@ -327,7 +323,10 @@ defmodule AdminScaffoldWeb.CoreComponents do
               phx-window-keydown={JS.exec(@on_cancel, "phx-remove")}
               phx-key="escape"
               phx-click-away={JS.exec(@on_cancel, "phx-remove")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-6 shadow-lg ring-1 transition-opacity"
+              class={[
+                "shadow-zinc-700/10 ring-zinc-700/10 relative rounded-2xl bg-white p-6 shadow-lg ring-1 transition-opacity",
+                !@show && "hidden"
+              ]}
             >
               <div class="absolute top-6 right-6">
                 <button
@@ -339,9 +338,8 @@ defmodule AdminScaffoldWeb.CoreComponents do
                   <.icon name="hero-x-mark" class="size-5" />
                 </button>
               </div>
-              <div id={"#{@id}-content"}>
-                {render_slot(@inner_block)}
-              </div>
+              
+              <div id={"#{@id}-content"}>{render_slot(@inner_block)}</div>
             </.focus_wrap>
           </div>
         </div>
@@ -357,8 +355,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
-      <.icon name="hero-exclamation-circle" class="size-5" />
-      {render_slot(@inner_block)}
+      <.icon name="hero-exclamation-circle" class="size-5" /> {render_slot(@inner_block)}
     </p>
     """
   end
@@ -374,13 +371,11 @@ defmodule AdminScaffoldWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
-          {render_slot(@inner_block)}
-        </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
-          {render_slot(@subtitle)}
-        </p>
+        <h1 class="text-lg font-semibold leading-8">{render_slot(@inner_block)}</h1>
+        
+        <p :if={@subtitle != []} class="text-sm text-base-content/70">{render_slot(@subtitle)}</p>
       </div>
+      
       <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
@@ -422,11 +417,11 @@ defmodule AdminScaffoldWeb.CoreComponents do
       <thead>
         <tr>
           <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
-            <span class="sr-only">{gettext("Actions")}</span>
-          </th>
+          
+          <th :if={@action != []}><span class="sr-only">{gettext("Actions")}</span></th>
         </tr>
       </thead>
+      
       <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
         <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
           <td
@@ -436,6 +431,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
           >
             {render_slot(col, @row_item.(row))}
           </td>
+          
           <td :if={@action != []} class="w-0 font-semibold">
             <div class="flex gap-4">
               <%= for action <- @action do %>
@@ -469,6 +465,7 @@ defmodule AdminScaffoldWeb.CoreComponents do
       <li :for={item <- @item} class="list-row">
         <div class="list-col-grow">
           <div class="font-bold">{item.title}</div>
+          
           <div>{render_slot(item)}</div>
         </div>
       </li>
@@ -506,8 +503,19 @@ defmodule AdminScaffoldWeb.CoreComponents do
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
+    # 确保 selector 以 # 开头
+    selector = if String.starts_with?(selector, "#"), do: selector, else: "##{selector}"
+
     JS.show(js,
       to: selector,
+      time: 300,
+      transition:
+        {"transition-all ease-out duration-300",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+         "opacity-100 translate-y-0 sm:scale-100"}
+    )
+    |> JS.show(
+      to: "#{selector} .modal-content",
       time: 300,
       transition:
         {"transition-all ease-out duration-300",
@@ -517,6 +525,9 @@ defmodule AdminScaffoldWeb.CoreComponents do
   end
 
   def hide(js \\ %JS{}, selector) do
+    # 确保 selector 以 # 开头
+    selector = if String.starts_with?(selector, "#"), do: selector, else: "##{selector}"
+
     JS.hide(js,
       to: selector,
       time: 200,

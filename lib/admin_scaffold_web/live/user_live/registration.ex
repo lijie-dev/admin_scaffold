@@ -21,8 +21,14 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
             </:subtitle>
           </.header>
         </div>
-
-        <.form for={@form} id="registration_form" action={~p"/users/register"} phx-submit="save" phx-change="validate">
+        
+        <.form
+          for={@form}
+          id="registration_form"
+          action={~p"/users/register"}
+          phx-submit="save"
+          phx-change="validate"
+        >
           <.input
             field={@form[:email]}
             type="email"
@@ -38,7 +44,6 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
             autocomplete="new-password"
             required
           />
-
           <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
             Create an account
           </.button>

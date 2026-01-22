@@ -27,6 +27,7 @@ defmodule AdminScaffoldWeb.UserLive.Show do
           <div class="sm:flex-auto">
             <h1 class="text-3xl font-bold text-gray-900">用户详情</h1>
           </div>
+          
           <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <.link
               navigate={~p"/admin/users"}
@@ -36,32 +37,31 @@ defmodule AdminScaffoldWeb.UserLive.Show do
             </.link>
           </div>
         </div>
-
+        
         <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
           <div class="px-4 py-5 sm:px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">
-              用户信息
-            </h3>
-            <p class="mt-1 max-w-2xl text-sm text-gray-500">
-              详细的用户账户信息
-            </p>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">用户信息</h3>
+            
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">详细的用户账户信息</p>
           </div>
+          
           <div class="border-t border-gray-200">
             <dl>
               <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">用户 ID</dt>
-                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <%= @user.id %>
-                </dd>
+                
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{@user.id}</dd>
               </div>
+              
               <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">邮箱地址</dt>
-                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <%= @user.email %>
-                </dd>
+                
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{@user.email}</dd>
               </div>
+              
               <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">邮箱确认状态</dt>
+                
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                   <%= if @user.confirmed_at do %>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -74,16 +74,20 @@ defmodule AdminScaffoldWeb.UserLive.Show do
                   <% end %>
                 </dd>
               </div>
+              
               <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">注册时间</dt>
+                
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <%= Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S") %>
+                  {Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}
                 </dd>
               </div>
+              
               <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">最后更新</dt>
+                
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <%= Calendar.strftime(@user.updated_at, "%Y-%m-%d %H:%M:%S") %>
+                  {Calendar.strftime(@user.updated_at, "%Y-%m-%d %H:%M:%S")}
                 </dd>
               </div>
             </dl>

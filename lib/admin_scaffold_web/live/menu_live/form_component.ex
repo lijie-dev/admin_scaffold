@@ -7,10 +7,13 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
   def render(assigns) do
     ~H"""
     <div class="brutal-card p-6" style="background: var(--color-bg-card);">
-      <h2 class="text-2xl font-black mb-6" style="font-family: var(--font-display); color: var(--color-text-primary);">
-        <%= @title %>
+      <h2
+        class="text-2xl font-black mb-6"
+        style="font-family: var(--font-display); color: var(--color-text-primary);"
+      >
+        {@title}
       </h2>
-
+      
       <.form
         for={@form}
         phx-target={@myself}
@@ -19,7 +22,10 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
       >
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-bold mb-2" style="color: var(--color-text-primary); font-family: var(--font-display);">
+            <label
+              class="block text-sm font-bold mb-2"
+              style="color: var(--color-text-primary); font-family: var(--font-display);"
+            >
               菜单名称
             </label>
             <input
@@ -31,9 +37,12 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
               placeholder="请输入菜单名称"
             />
           </div>
-
+          
           <div>
-            <label class="block text-sm font-bold mb-2" style="color: var(--color-text-primary); font-family: var(--font-display);">
+            <label
+              class="block text-sm font-bold mb-2"
+              style="color: var(--color-text-primary); font-family: var(--font-display);"
+            >
               菜单路径
             </label>
             <input
@@ -45,9 +54,12 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
               placeholder="/dashboard"
             />
           </div>
-
+          
           <div>
-            <label class="block text-sm font-bold mb-2" style="color: var(--color-text-primary); font-family: var(--font-display);">
+            <label
+              class="block text-sm font-bold mb-2"
+              style="color: var(--color-text-primary); font-family: var(--font-display);"
+            >
               图标
             </label>
             <input
@@ -59,9 +71,12 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
               placeholder="hero-home"
             />
           </div>
-
+          
           <div>
-            <label class="block text-sm font-bold mb-2" style="color: var(--color-text-primary); font-family: var(--font-display);">
+            <label
+              class="block text-sm font-bold mb-2"
+              style="color: var(--color-text-primary); font-family: var(--font-display);"
+            >
               排序
             </label>
             <input
@@ -72,9 +87,12 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
               style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-mono);"
             />
           </div>
-
+          
           <div>
-            <label class="block text-sm font-bold mb-2" style="color: var(--color-text-primary); font-family: var(--font-display);">
+            <label
+              class="block text-sm font-bold mb-2"
+              style="color: var(--color-text-primary); font-family: var(--font-display);"
+            >
               状态
             </label>
             <select
@@ -83,11 +101,12 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
               style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-body);"
             >
               <option value="1" selected={@form[:status].value == 1}>启用</option>
+              
               <option value="0" selected={@form[:status].value == 0}>禁用</option>
             </select>
           </div>
         </div>
-
+        
         <div class="flex gap-3 mt-6">
           <button
             type="submit"

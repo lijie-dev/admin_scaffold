@@ -11,10 +11,13 @@ defmodule AdminScaffold.PageBuilder.Page do
     field :name, :string
     field :title, :string
     field :slug, :string
-    field :type, :string, default: "list"  # list, form, detail, dashboard
-    field :config, :map                    # JSON 配置
+    # list, form, detail, dashboard
+    field :type, :string, default: "list"
+    # JSON 配置
+    field :config, :map
     field :icon, :string
-    field :status, :string, default: "active"  # active, inactive
+    # active, inactive
+    field :status, :string, default: "active"
     field :sort, :integer, default: 0
 
     timestamps(type: :utc_datetime)

@@ -7,8 +7,8 @@ defmodule AdminScaffoldWeb.PermissionLive.FormComponent do
   def render(assigns) do
     ~H"""
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4"><%= @title %></h2>
-
+      <h2 class="text-2xl font-bold mb-4">{@title}</h2>
+      
       <.form
         for={@form}
         id="permission-form"
@@ -27,7 +27,7 @@ defmodule AdminScaffoldWeb.PermissionLive.FormComponent do
             required
           />
         </div>
-
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">权限标识</label>
           <input
@@ -38,16 +38,15 @@ defmodule AdminScaffoldWeb.PermissionLive.FormComponent do
             required
           />
         </div>
-
+        
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
-          <textarea
+          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label> <textarea
             name="permission[description]"
             class="w-full px-3 py-2 border border-gray-300 rounded-md"
             rows="3"
           ><%= @form[:description].value %></textarea>
         </div>
-
+        
         <div class="flex justify-end gap-2">
           <button
             type="submit"

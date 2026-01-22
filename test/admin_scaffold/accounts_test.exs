@@ -80,7 +80,10 @@ defmodule AdminScaffold.AccountsTest do
     test "registers users with password" do
       email = unique_user_email()
       password = valid_user_password()
-      {:ok, user} = Accounts.register_user(valid_user_attributes(email: email, password: password))
+
+      {:ok, user} =
+        Accounts.register_user(valid_user_attributes(email: email, password: password))
+
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)

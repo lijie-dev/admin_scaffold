@@ -6,38 +6,58 @@
         <div class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-4">
           Admin Dashboard v2.0
         </div>
-        <h1 class="text-4xl font-bold mb-3">
-          欢迎回来！
-        </h1>
-        <p class="text-lg text-blue-100 mb-6">
-          这是一个基于 Elixir 和 Phoenix 构建的现代化管理后台系统
-        </p>
+        
+        <h1 class="text-4xl font-bold mb-3">欢迎回来！</h1>
+        
+        <p class="text-lg text-blue-100 mb-6">这是一个基于 Elixir 和 Phoenix 构建的现代化管理后台系统</p>
+        
         <div class="flex gap-3">
-          <a href="/dashboard" class="px-6 py-2.5 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors inline-flex items-center gap-2">
+          <a
+            href="/dashboard"
+            class="px-6 py-2.5 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors inline-flex items-center gap-2"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+              />
             </svg>
             查看数据
           </a>
-          <a href="/users" class="px-6 py-2.5 bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors inline-flex items-center gap-2">
+          <a
+            href="/users"
+            class="px-6 py-2.5 bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors inline-flex items-center gap-2"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
             </svg>
             用户管理
           </a>
         </div>
       </div>
+      
       <div class="hidden lg:block">
         <div class="w-32 h-32 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
           <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
           </svg>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 <!-- Stats Grid - SaaS Tech Style -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
   <!-- Stat Card 1 -->
@@ -45,180 +65,276 @@
     <div class="flex items-center justify-between mb-4">
       <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          />
         </svg>
       </div>
+      
       <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">用户</span>
     </div>
+    
     <div class="text-3xl font-bold text-slate-900 mb-1">1,234</div>
+    
     <div class="text-sm text-slate-600 mb-3">总用户数</div>
+    
     <div class="flex items-center gap-1 text-xs font-medium text-green-600">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-      </svg>
-      <span>+8.2% 本月</span>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 10l7-7m0 0l7 7m-7-7v18"
+        />
+      </svg> <span>+8.2% 本月</span>
     </div>
   </div>
-
   <!-- Stat Card 2 -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
     <div class="flex items-center justify-between mb-4">
       <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
         </svg>
       </div>
-      <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">活跃</span>
+      
+      <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+        活跃
+      </span>
     </div>
+    
     <div class="text-3xl font-bold text-slate-900 mb-1">856</div>
+    
     <div class="text-sm text-slate-600 mb-3">活跃用户</div>
+    
     <div class="flex items-center gap-1 text-xs font-medium text-green-600">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-      </svg>
-      <span>+15.3% 本周</span>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 10l7-7m0 0l7 7m-7-7v18"
+        />
+      </svg> <span>+15.3% 本周</span>
     </div>
   </div>
-
   <!-- Stat Card 3 -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
     <div class="flex items-center justify-between mb-4">
       <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
         <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       </div>
-      <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">今日</span>
+      
+      <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+        今日
+      </span>
     </div>
+    
     <div class="text-3xl font-bold text-slate-900 mb-1">42</div>
+    
     <div class="text-sm text-slate-600 mb-3">今日访问</div>
+    
     <div class="flex items-center gap-1 text-xs font-medium text-amber-600">
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-      <span>峰值时段</span>
+      </svg> <span>峰值时段</span>
     </div>
   </div>
-
   <!-- Stat Card 4 -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
     <div class="flex items-center justify-between mb-4">
       <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+          />
         </svg>
       </div>
-      <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">增长</span>
+      
+      <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+        增长
+      </span>
     </div>
+    
     <div class="text-3xl font-bold text-slate-900 mb-1">+12%</div>
+    
     <div class="text-sm text-slate-600 mb-3">月增长率</div>
+    
     <div class="flex items-center gap-1 text-xs font-medium text-green-600">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>超出目标</span>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg> <span>超出目标</span>
     </div>
   </div>
 </div>
-
 <!-- Quick Actions - SaaS Tech Style -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
   <!-- Action Card 1 -->
-  <a href="/users" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all group">
+  <a
+    href="/users"
+    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all group"
+  >
     <div class="flex items-center gap-4 mb-4">
       <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
         <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          />
         </svg>
       </div>
+      
       <div class="flex-1">
         <h3 class="text-xl font-bold text-slate-900 mb-1">用户管理</h3>
+        
         <p class="text-sm text-slate-600">管理系统用户</p>
       </div>
     </div>
+    
     <div class="flex items-center justify-between">
       <span class="text-sm font-medium text-blue-600 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
         查看详情
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-      </span>
-      <span class="text-xs font-medium text-slate-500">1,234 用户</span>
+      </span> <span class="text-xs font-medium text-slate-500">1,234 用户</span>
     </div>
   </a>
-
   <!-- Action Card 2 -->
-  <a href="/dashboard" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-purple-300 transition-all group">
+  <a
+    href="/dashboard"
+    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-purple-300 transition-all group"
+  >
     <div class="flex items-center gap-4 mb-4">
       <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
         <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
         </svg>
       </div>
+      
       <div class="flex-1">
         <h3 class="text-xl font-bold text-slate-900 mb-1">仪表盘</h3>
+        
         <p class="text-sm text-slate-600">查看数据统计</p>
       </div>
     </div>
+    
     <div class="flex items-center justify-between">
       <span class="text-sm font-medium text-purple-600 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
         查看详情
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-      </span>
-      <span class="text-xs font-medium text-slate-500">实时数据</span>
+      </span> <span class="text-xs font-medium text-slate-500">实时数据</span>
     </div>
   </a>
-
   <!-- Action Card 3 -->
-  <a href="/users/settings" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-amber-300 transition-all group">
+  <a
+    href="/users/settings"
+    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-amber-300 transition-all group"
+  >
     <div class="flex items-center gap-4 mb-4">
       <div class="w-14 h-14 bg-amber-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
         <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
         </svg>
       </div>
+      
       <div class="flex-1">
         <h3 class="text-xl font-bold text-slate-900 mb-1">系统设置</h3>
+        
         <p class="text-sm text-slate-600">配置系统参数</p>
       </div>
     </div>
+    
     <div class="flex items-center justify-between">
       <span class="text-sm font-medium text-amber-600 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
         查看详情
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-      </span>
-      <span class="text-xs font-medium text-slate-500">配置中心</span>
+      </span> <span class="text-xs font-medium text-slate-500">配置中心</span>
     </div>
   </a>
 </div>
-
 <!-- Footer Info - SaaS Style -->
 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
   <div class="flex flex-col md:flex-row items-center justify-between gap-6">
     <div class="flex items-center gap-4">
       <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
         </svg>
       </div>
+      
       <div>
         <p class="font-bold text-lg text-slate-900 mb-1">系统版本: v0.1.0</p>
+        
         <p class="text-sm text-slate-600">基于 Phoenix Framework 构建</p>
+        
         <div class="flex gap-2 mt-2">
-          <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Elixir</span>
-          <span class="px-2 py-1 bg-pink-100 text-pink-700 text-xs font-medium rounded">Phoenix</span>
-          <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">LiveView</span>
+          <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">
+            Elixir
+          </span>
+          <span class="px-2 py-1 bg-pink-100 text-pink-700 text-xs font-medium rounded">
+            Phoenix
+          </span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+            LiveView
+          </span>
         </div>
       </div>
     </div>
-
+    
     <div class="text-center md:text-right">
       <p class="font-bold text-lg text-slate-900 mb-2">© 2026 管理后台系统</p>
+      
       <p class="text-sm text-slate-600 mb-3">Powered by Elixir & Phoenix</p>
     </div>
   </div>
