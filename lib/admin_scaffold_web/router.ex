@@ -28,7 +28,7 @@ defmodule AdminScaffoldWeb.Router do
   #   pipe_through :api
   # end
 
-  # Enable LiveDashboard in development
+  # Enable LiveDashboard and development tools in development
   if Application.compile_env(:admin_scaffold, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
@@ -41,6 +41,7 @@ defmodule AdminScaffoldWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: AdminScaffoldWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 
@@ -72,6 +73,9 @@ defmodule AdminScaffoldWeb.Router do
       live "/admin/menus", MenuLive.Index, :index
       live "/admin/menus/new", MenuLive.Index, :new
       live "/admin/menus/:id/edit", MenuLive.Index, :edit
+
+      # 页面构建器示例
+      live "/admin/page-builder/example", PageLive.Example, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password

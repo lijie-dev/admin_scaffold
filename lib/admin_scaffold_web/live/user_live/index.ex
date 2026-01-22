@@ -164,7 +164,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <.link
-                      patch={~p"/admin/users/#{user}/edit"}
+                      patch={~p"/admin/users/#{user.id}/edit"}
                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg inline-flex items-center gap-2 text-sm transition-colors"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

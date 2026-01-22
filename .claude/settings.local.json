@@ -20,7 +20,13 @@
       "Bash(python3:*)",
       "Bash(taskkill:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(mix ecto.rollback:*)",
+      "Bash(mix ecto.migrations:*)",
+      "Bash(mix ecto.reset:*)",
+      "Bash(psql:*)",
+      "Bash(mix run:*)",
+      "Bash(mix ecto.drop:*)"
     ]
   }
 }
