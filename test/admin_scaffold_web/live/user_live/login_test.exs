@@ -9,7 +9,7 @@ defmodule AdminScaffoldWeb.UserLive.LoginTest do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "Log in"
-      assert html =~ "Register"
+      assert html =~ "Sign up"
       assert html =~ "Log in with email"
     end
   end
@@ -25,7 +25,7 @@ defmodule AdminScaffoldWeb.UserLive.LoginTest do
         |> render_submit()
         |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert html =~ "If your email is in our system"
+      assert html =~ "If your email is in our system, you will receive instructions"
 
       assert AdminScaffold.Repo.get_by!(AdminScaffold.Accounts.UserToken, user_id: user.id).context ==
                "login"
@@ -39,7 +39,7 @@ defmodule AdminScaffoldWeb.UserLive.LoginTest do
         |> render_submit()
         |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert html =~ "If your email is in our system"
+      assert html =~ "If your email is in our system, you will receive instructions"
     end
   end
 

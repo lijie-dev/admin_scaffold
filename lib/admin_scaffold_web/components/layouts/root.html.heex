@@ -382,12 +382,15 @@
         <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-10">
           <div class="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
-          
+
           <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500 rounded-full blur-3xl">
           </div>
         </div>
-        
-        <div class="relative z-10">{@inner_content}</div>
+
+        <div class="relative z-10">
+          <Layouts.flash_group flash={@flash} />
+          {@inner_content}
+        </div>
       </div>
     <% end %>
     <!-- Mobile Menu Overlay -->
