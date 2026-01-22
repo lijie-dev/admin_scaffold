@@ -12,6 +12,8 @@ defmodule AdminScaffold.Application do
       AdminScaffold.Repo,
       {DNSCluster, query: Application.get_env(:admin_scaffold, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AdminScaffold.PubSub},
+      # Start the permission cache
+      AdminScaffold.PermissionCache,
       # Start a worker by calling: AdminScaffold.Worker.start_link(arg)
       # {AdminScaffold.Worker, arg},
       # Start to serve requests, typically the last entry

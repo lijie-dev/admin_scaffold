@@ -12,9 +12,7 @@ defmodule AdminScaffoldWeb.ErrorHelpers do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-2 text-sm text-red-600 phx-no-feedback:hidden">
-      <%= render_slot(@inner_block) %>
-    </p>
+    <p class="mt-2 text-sm text-red-600 phx-no-feedback:hidden">{render_slot(@inner_block)}</p>
     """
   end
 
@@ -25,9 +23,7 @@ defmodule AdminScaffoldWeb.ErrorHelpers do
 
   def error_tag(assigns) do
     ~H"""
-    <.error :for={msg <- Enum.map(@field.errors, &translate_error(&1))}>
-      <%= msg %>
-    </.error>
+    <.error :for={msg <- Enum.map(@field.errors, &translate_error(&1))}>{msg}</.error>
     """
   end
 

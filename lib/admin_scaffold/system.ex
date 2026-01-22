@@ -71,6 +71,44 @@ defmodule AdminScaffold.System do
   end
 
   @doc """
+  返回审计日志总数。
+  """
+  def count_audit_logs do
+    Repo.aggregate(AuditLog, :count, :id)
+  end
+
+  @doc """
+  返回今日操作数。
+  """
+  def count_today_actions do
+    today = DateTime.utc_now() |> DateTime.to_date()
+
+    from(a in AuditLog,
+      where: fragment("DATE(?)", a.inserted_at) == ^today
+    )
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
+  获取最近7天的操作统计数据。
+  返回格式: [%{date: ~D[2026-01-22], count: 10}, ...]
+  """
+  def get_recent_actions_stats(days \\ 7) do
+    start_date = Date.utc_today() |> Date.add(-days + 1)
+
+    from(a in AuditLog,
+      where: fragment("DATE(?)", a.inserted_at) >= ^start_date,
+      group_by: fragment("DATE(?)", a.inserted_at),
+      select: %{
+        date: fragment("DATE(?)", a.inserted_at),
+        count: count(a.id)
+      },
+      order_by: [asc: fragment("DATE(?)", a.inserted_at)]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   获取单个审计日志。
 
   ## Examples
@@ -88,21 +126,25 @@ defmodule AdminScaffold.System do
   # Private helper functions
 
   defp maybe_filter_by_user(query, nil), do: query
+
   defp maybe_filter_by_user(query, user_id) do
     from(a in query, where: a.user_id == ^user_id)
   end
 
   defp maybe_filter_by_resource(query, nil), do: query
+
   defp maybe_filter_by_resource(query, resource) do
     from(a in query, where: a.resource == ^resource)
   end
 
   defp maybe_filter_by_action(query, nil), do: query
+
   defp maybe_filter_by_action(query, action) do
     from(a in query, where: a.action == ^action)
   end
 
   defp maybe_limit(query, nil), do: query
+
   defp maybe_limit(query, limit) do
     from(a in query, limit: ^limit)
   end

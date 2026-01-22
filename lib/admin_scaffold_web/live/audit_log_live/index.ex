@@ -29,23 +29,28 @@ defmodule AdminScaffoldWeb.AuditLogLive.Index do
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex-1">
             <h1 class="text-4xl font-bold mb-2 text-slate-900">审计日志</h1>
+            
             <p class="text-lg text-slate-600">查看系统操作记录</p>
           </div>
-
+          
           <div class="flex gap-3">
             <.link
               navigate={~p"/dashboard"}
               class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
               </svg>
               返回仪表板
             </.link>
           </div>
         </div>
       </div>
-
       <!-- Audit Logs Table -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
@@ -55,39 +60,44 @@ defmodule AdminScaffoldWeb.AuditLogLive.Index do
                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   时间
                 </th>
+                
                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   用户
                 </th>
+                
                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   操作
                 </th>
+                
                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   资源
                 </th>
+                
                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   详情
                 </th>
               </tr>
             </thead>
+            
             <tbody class="bg-white divide-y divide-slate-200" id="audit_logs" phx-update="stream">
               <tr :for={{dom_id, log} <- @streams.audit_logs} id={dom_id} class="hover:bg-slate-50">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                  <%= Calendar.strftime(log.inserted_at, "%Y-%m-%d %H:%M:%S") %>
+                  {Calendar.strftime(log.inserted_at, "%Y-%m-%d %H:%M:%S")}
                 </td>
+                
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                  <%= if log.user, do: log.user.email, else: "系统" %>
+                  {if log.user, do: log.user.email, else: "系统"}
                 </td>
+                
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class={action_badge_class(log.action)}>
-                    <%= action_text(log.action) %>
-                  </span>
+                  <span class={action_badge_class(log.action)}>{action_text(log.action)}</span>
                 </td>
+                
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                  <%= log.resource %> #<%= log.resource_id %>
+                  {log.resource} #{log.resource_id}
                 </td>
-                <td class="px-6 py-4 text-sm text-slate-600">
-                  <%= format_details(log.details) %>
-                </td>
+                
+                <td class="px-6 py-4 text-sm text-slate-600">{format_details(log.details)}</td>
               </tr>
             </tbody>
           </table>
@@ -106,19 +116,32 @@ defmodule AdminScaffoldWeb.AuditLogLive.Index do
   defp action_text("logout"), do: "登出"
   defp action_text(action), do: action
 
-  defp action_badge_class("create"), do: "px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800"
-  defp action_badge_class("update"), do: "px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800"
-  defp action_badge_class("delete"), do: "px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800"
-  defp action_badge_class("login"), do: "px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800"
-  defp action_badge_class("logout"), do: "px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800"
-  defp action_badge_class(_), do: "px-2 py-1 text-xs font-medium rounded bg-slate-100 text-slate-800"
+  defp action_badge_class("create"),
+    do: "px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800"
+
+  defp action_badge_class("update"),
+    do: "px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800"
+
+  defp action_badge_class("delete"),
+    do: "px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800"
+
+  defp action_badge_class("login"),
+    do: "px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800"
+
+  defp action_badge_class("logout"),
+    do: "px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800"
+
+  defp action_badge_class(_),
+    do: "px-2 py-1 text-xs font-medium rounded bg-slate-100 text-slate-800"
 
   defp format_details(nil), do: "-"
+
   defp format_details(details) when is_map(details) do
     details
     |> Enum.map(fn {k, v} -> "#{k}: #{inspect(v)}" end)
     |> Enum.join(", ")
     |> String.slice(0, 100)
   end
+
   defp format_details(_), do: "-"
 end

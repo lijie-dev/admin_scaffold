@@ -56,7 +56,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex-1">
             <h1 class="text-4xl font-bold mb-2 text-slate-900">权限管理</h1>
-            
+
             <p class="text-lg flex items-center gap-2 text-slate-600">
               配置系统权限和访问控制
               <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
@@ -64,7 +64,7 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
               </span>
             </p>
           </div>
-          
+
           <div class="flex gap-3">
             <.link
               navigate={~p"/dashboard"}
@@ -177,11 +177,11 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
             </svg>
           </div>
         </div>
-        
+
         <h3 class="text-2xl font-semibold mb-2 text-slate-900">暂无权限</h3>
-        
+
         <p class="mb-6 text-slate-600">点击上方"新建权限"按钮创建第一个权限</p>
-        
+
         <.link
           patch={~p"/admin/permissions/new"}
           class="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium inline-flex items-center gap-2 rounded-lg transition-colors"

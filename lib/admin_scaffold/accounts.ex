@@ -8,6 +8,7 @@ defmodule AdminScaffold.Accounts do
 
   alias AdminScaffold.Accounts.{User, UserToken, UserNotifier, Role, Permission, Menu}
   alias AdminScaffold.System
+  alias AdminScaffold.PermissionCache
 
   ## Database getters
 
@@ -22,6 +23,20 @@ defmodule AdminScaffold.Accounts do
   """
   def count_users do
     Repo.aggregate(User, :count, :id)
+  end
+
+  @doc """
+  Returns the count of roles.
+  """
+  def count_roles do
+    Repo.aggregate(Role, :count, :id)
+  end
+
+  @doc """
+  Returns the count of permissions.
+  """
+  def count_permissions do
+    Repo.aggregate(Permission, :count, :id)
   end
 
   @doc """
@@ -129,7 +144,15 @@ defmodule AdminScaffold.Accounts do
   def delete_user(%User{} = user, current_user \\ nil, metadata \\ %{}) do
     case Repo.delete(user) do
       {:ok, deleted_user} = result ->
-        System.log_action(current_user, "delete", "User", deleted_user.id, %{email: deleted_user.email}, metadata)
+        System.log_action(
+          current_user,
+          "delete",
+          "User",
+          deleted_user.id,
+          %{email: deleted_user.email},
+          metadata
+        )
+
         result
 
       error ->
@@ -446,7 +469,15 @@ defmodule AdminScaffold.Accounts do
   def delete_role(%Role{} = role, current_user \\ nil, metadata \\ %{}) do
     case Repo.delete(role) do
       {:ok, deleted_role} = result ->
-        System.log_action(current_user, "delete", "Role", deleted_role.id, %{name: deleted_role.name}, metadata)
+        System.log_action(
+          current_user,
+          "delete",
+          "Role",
+          deleted_role.id,
+          %{name: deleted_role.name},
+          metadata
+        )
+
         result
 
       error ->
@@ -484,10 +515,21 @@ defmodule AdminScaffold.Accounts do
     role = role |> Repo.preload(:permissions)
     permissions = Repo.all(from p in Permission, where: p.id in ^permission_ids)
 
-    role
-    |> Ecto.Changeset.change()
-    |> Ecto.Changeset.put_assoc(:permissions, permissions)
-    |> Repo.update()
+    result =
+      role
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:permissions, permissions)
+      |> Repo.update()
+
+    # 清除拥有此角色的所有用户的权限缓存
+    case result do
+      {:ok, updated_role} ->
+        clear_role_users_cache(updated_role.id)
+        result
+
+      _ ->
+        result
+    end
   end
 
   @doc """
@@ -525,7 +567,15 @@ defmodule AdminScaffold.Accounts do
          |> Permission.changeset(attrs)
          |> Repo.insert() do
       {:ok, permission} = result ->
-        System.log_action(current_user, "create", "Permission", permission.id, %{name: permission.name, slug: permission.slug}, metadata)
+        System.log_action(
+          current_user,
+          "create",
+          "Permission",
+          permission.id,
+          %{name: permission.name, slug: permission.slug},
+          metadata
+        )
+
         result
 
       error ->
@@ -541,7 +591,15 @@ defmodule AdminScaffold.Accounts do
          |> Permission.changeset(attrs)
          |> Repo.update() do
       {:ok, updated_permission} = result ->
-        System.log_action(current_user, "update", "Permission", updated_permission.id, attrs, metadata)
+        System.log_action(
+          current_user,
+          "update",
+          "Permission",
+          updated_permission.id,
+          attrs,
+          metadata
+        )
+
         result
 
       error ->
@@ -555,7 +613,15 @@ defmodule AdminScaffold.Accounts do
   def delete_permission(%Permission{} = permission, current_user \\ nil, metadata \\ %{}) do
     case Repo.delete(permission) do
       {:ok, deleted_permission} = result ->
-        System.log_action(current_user, "delete", "Permission", deleted_permission.id, %{name: deleted_permission.name, slug: deleted_permission.slug}, metadata)
+        System.log_action(
+          current_user,
+          "delete",
+          "Permission",
+          deleted_permission.id,
+          %{name: deleted_permission.name, slug: deleted_permission.slug},
+          metadata
+        )
+
         result
 
       error ->
@@ -628,15 +694,32 @@ defmodule AdminScaffold.Accounts do
 
   """
   def get_user_permissions(user_id) do
-    from(p in Permission,
-      join: rp in "role_permissions",
-      on: p.id == rp.permission_id,
-      join: ur in "user_roles",
-      on: rp.role_id == ur.role_id,
-      where: ur.user_id == ^user_id,
-      distinct: true
-    )
-    |> Repo.all()
+    # 先尝试从缓存获取
+    case PermissionCache.get_user_permissions(user_id) do
+      {:ok, permissions} ->
+        permissions
+
+      {:error, _} ->
+        # 缓存未命中或已过期,从数据库查询
+        permissions =
+          from(p in Permission,
+            join: rp in "role_permissions",
+            on: p.id == rp.permission_id,
+            join: ur in "user_roles",
+            on: rp.role_id == ur.role_id,
+            where: ur.user_id == ^user_id,
+            distinct: true
+          )
+          |> Repo.all()
+
+        # 尝试将结果存入缓存(忽略错误)
+        case PermissionCache.put_user_permissions(user_id, permissions) do
+          :ok -> :ok
+          {:error, _reason} -> :ok
+        end
+
+        permissions
+    end
   end
 
   @doc """
@@ -652,14 +735,10 @@ defmodule AdminScaffold.Accounts do
 
   """
   def has_permission?(%User{id: user_id}, permission_slug) when is_binary(permission_slug) do
-    from(p in Permission,
-      join: rp in "role_permissions",
-      on: p.id == rp.permission_id,
-      join: ur in "user_roles",
-      on: rp.role_id == ur.role_id,
-      where: ur.user_id == ^user_id and p.slug == ^permission_slug
-    )
-    |> Repo.exists?()
+    # 使用缓存的权限列表进行检查
+    user_id
+    |> get_user_permissions()
+    |> Enum.any?(fn permission -> permission.slug == permission_slug end)
   end
 
   def has_permission?(nil, _permission_slug), do: false
@@ -706,5 +785,23 @@ defmodule AdminScaffold.Accounts do
       order_by: [asc: m.sort]
     )
     |> Repo.all()
+  end
+
+  ## Private Functions
+
+  # 清除拥有指定角色的所有用户的权限缓存
+  defp clear_role_users_cache(role_id) do
+    # 查询所有拥有此角色的用户ID
+    user_ids =
+      from(ur in "user_roles",
+        where: ur.role_id == ^role_id,
+        select: ur.user_id
+      )
+      |> Repo.all()
+
+    # 清除这些用户的权限缓存
+    Enum.each(user_ids, fn user_id ->
+      PermissionCache.clear_user_permissions(user_id)
+    end)
   end
 end

@@ -7,10 +7,12 @@
     <.live_title default="管理后台" suffix=" · 管理系统">
       {assigns[:page_title]}
     </.live_title>
-     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
     <script phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
-    
+
     <script>
       // Sidebar toggle functionality
       document.addEventListener('DOMContentLoaded', function() {
@@ -45,7 +47,7 @@
         }
       });
     </script>
-    
+
     <style>
       /* SaaS Tech Design System */
       :root {
@@ -125,7 +127,7 @@
       }
     </style>
   </head>
-  
+
   <body class="antialiased bg-slate-50">
     <%= if @current_scope do %>
       <div class="min-h-screen flex">
@@ -140,10 +142,10 @@
               <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                 A
               </div>
-              
+
               <div class="logo-text transition-all duration-300">
                 <div class="text-xl font-bold text-slate-900">管理系统</div>
-                
+
                 <div class="text-xs text-slate-500">Admin v2.0</div>
               </div>
             </div>
@@ -166,7 +168,8 @@
                   stroke-width="2"
                   d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">仪表板</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">仪表板</span>
             </.link>
             <.link
               navigate={~p"/admin/users"}
@@ -184,7 +187,8 @@
                   stroke-width="2"
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">用户管理</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">用户管理</span>
             </.link>
             <.link
               navigate={~p"/admin/roles"}
@@ -202,7 +206,8 @@
                   stroke-width="2"
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">角色管理</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">角色管理</span>
             </.link>
             <.link
               navigate={~p"/admin/permissions"}
@@ -220,7 +225,8 @@
                   stroke-width="2"
                   d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">权限管理</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">权限管理</span>
             </.link>
             <.link
               navigate={~p"/admin/menus"}
@@ -238,7 +244,8 @@
                   stroke-width="2"
                   d="M4 6h16M4 12h16M4 18h16"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">菜单管理</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">菜单管理</span>
             </.link>
             <.link
               navigate={~p"/users/settings"}
@@ -262,7 +269,8 @@
                   stroke-width="2"
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
-              </svg> <span class="nav-text font-medium transition-all duration-300">系统设置</span>
+              </svg>
+               <span class="nav-text font-medium transition-all duration-300">系统设置</span>
             </.link>
           </nav>
           <!-- User Info & Toggle -->
@@ -272,19 +280,19 @@
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-semibold">
                   {String.first(@current_scope.user.email) |> String.upcase()}
                 </div>
-                
+
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-slate-900 truncate">
                     {@current_scope.user.email}
                   </p>
-                  
+
                   <p class="text-xs flex items-center gap-1 text-green-600">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span> <span>在线</span>
                   </p>
                 </div>
               </div>
             </div>
-            
+
             <button
               id="sidebar-toggle"
               class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
@@ -296,7 +304,8 @@
                   stroke-width="2"
                   d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
                 />
-              </svg> <span class="text-xs">收起</span>
+              </svg>
+               <span class="text-xs">收起</span>
             </button>
           </div>
         </aside>
@@ -337,7 +346,8 @@
                       stroke-width="2"
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
-                  </svg> <span class="text-sm font-medium">搜索</span>
+                  </svg>
+                   <span class="text-sm font-medium">搜索</span>
                 </button>
                 <!-- Notifications -->
                 <button class="relative p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">

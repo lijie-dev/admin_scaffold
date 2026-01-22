@@ -67,7 +67,7 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex-1">
             <h1 class="text-4xl font-bold mb-2 text-slate-900">角色管理</h1>
-            
+
             <p class="text-lg flex items-center gap-2 text-slate-600">
               管理系统角色和权限配置
               <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
@@ -75,7 +75,7 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
               </span>
             </p>
           </div>
-          
+
           <div class="flex gap-3">
             <.link
               navigate={~p"/dashboard"}
@@ -133,10 +133,10 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
                   />
                 </svg>
               </div>
-              
+
               <div class="flex-1">
                 <h3 class="text-xl font-bold mb-1 text-slate-900">{role.name}</h3>
-                
+
                 <p class="text-xs text-slate-500">ROLE_{String.upcase(role.name)}</p>
               </div>
             </div>
@@ -155,7 +155,8 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
                   stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-              </svg> {Calendar.strftime(role.inserted_at, "%Y-%m-%d")}
+              </svg>
+               {Calendar.strftime(role.inserted_at, "%Y-%m-%d")}
             </div>
           </div>
           <!-- Permissions and Menus Count -->
@@ -168,7 +169,8 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
                   stroke-width="2"
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-              </svg> {Enum.count(role.permissions || [])} 个权限
+              </svg>
+               {Enum.count(role.permissions || [])} 个权限
             </span>
             <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +180,8 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
                   stroke-width="2"
                   d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"
                 />
-              </svg> {Enum.count(role.menus || [])} 个菜单
+              </svg>
+               {Enum.count(role.menus || [])} 个菜单
             </span>
           </div>
           <!-- Actions -->
@@ -215,11 +218,11 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
             />
           </svg>
         </div>
-        
+
         <h3 class="text-2xl font-bold mb-2 text-slate-900">暂无角色</h3>
-        
+
         <p class="mb-6 text-slate-600">点击上方"新建角色"按钮创建第一个角色</p>
-        
+
         <.link
           patch={~p"/admin/roles/new"}
           class="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg inline-flex items-center gap-2 transition-colors"

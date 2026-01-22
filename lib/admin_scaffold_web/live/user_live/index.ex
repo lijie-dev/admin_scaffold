@@ -61,7 +61,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex-1">
             <h1 class="text-4xl font-bold mb-2 text-slate-900">用户管理</h1>
-            
+
             <p class="text-lg flex items-center gap-2 text-slate-600">
               系统中所有注册用户的列表
               <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
@@ -69,7 +69,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
               </span>
             </p>
           </div>
-          
+
           <div class="flex gap-3">
             <.link
               navigate={~p"/dashboard"}
@@ -95,13 +95,13 @@ defmodule AdminScaffoldWeb.UserLive.Index do
             <h2 class="text-xl font-bold flex items-center gap-3 text-slate-900">
               <span class="w-1 h-6 bg-pink-600 rounded"></span> 用户列表
             </h2>
-            
+
             <div class="flex items-center gap-2 text-slate-500 text-sm">
               <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> 实时数据
             </div>
           </div>
         </div>
-        
+
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-slate-50 border-b border-slate-200">
@@ -109,25 +109,25 @@ defmodule AdminScaffoldWeb.UserLive.Index do
                 <th class="text-left px-6 py-3 text-xs font-medium text-blue-600 uppercase tracking-wider">
                   ID
                 </th>
-                
+
                 <th class="text-left px-6 py-3 text-xs font-medium text-pink-600 uppercase tracking-wider">
                   邮箱地址
                 </th>
-                
+
                 <th class="text-left px-6 py-3 text-xs font-medium text-purple-600 uppercase tracking-wider">
                   状态
                 </th>
-                
+
                 <th class="text-left px-6 py-3 text-xs font-medium text-purple-600 uppercase tracking-wider">
                   注册时间
                 </th>
-                
+
                 <th class="text-right px-6 py-3 text-xs font-medium text-amber-600 uppercase tracking-wider">
                   操作
                 </th>
               </tr>
             </thead>
-            
+
             <tbody id="users" phx-update="stream" class="bg-white divide-y divide-slate-200">
               <tr
                 :for={{dom_id, user} <- @streams.users}
@@ -137,21 +137,21 @@ defmodule AdminScaffoldWeb.UserLive.Index do
                 <td class="px-6 py-4 text-blue-600">
                   <div class="font-bold">#{user.id}</div>
                 </td>
-                
+
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center font-bold text-white">
                       {String.first(user.email) |> String.upcase()}
                     </div>
-                    
+
                     <div>
                       <div class="font-bold text-slate-900">{user.email}</div>
-                      
+
                       <div class="text-xs text-slate-500">User Account</div>
                     </div>
                   </div>
                 </td>
-                
+
                 <td class="px-6 py-4">
                   <%= if user.status == "active" do %>
                     <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
@@ -163,7 +163,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
                     </span>
                   <% end %>
                 </td>
-                
+
                 <td class="px-6 py-4 text-slate-600">
                   <div class="flex flex-col">
                     <span class="font-bold">{Calendar.strftime(user.inserted_at, "%Y-%m-%d")}</span>
@@ -172,7 +172,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
                     </span>
                   </div>
                 </td>
-                
+
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <.link
@@ -224,7 +224,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
             </svg>
             显示所有用户
           </div>
-          
+
           <div class="px-4 py-2 bg-amber-100 text-amber-700 font-medium rounded-lg text-sm">
             共 {length(@streams.users.inserts)} 条记录
           </div>

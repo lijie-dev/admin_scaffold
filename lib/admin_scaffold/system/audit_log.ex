@@ -25,7 +25,15 @@ defmodule AdminScaffold.System.AuditLog do
   @doc false
   def changeset(audit_log, attrs) do
     audit_log
-    |> cast(attrs, [:action, :resource, :resource_id, :ip_address, :user_agent, :details, :user_id])
+    |> cast(attrs, [
+      :action,
+      :resource,
+      :resource_id,
+      :ip_address,
+      :user_agent,
+      :details,
+      :user_id
+    ])
     |> validate_required([:action, :resource])
     |> validate_inclusion(:action, @valid_actions)
     |> foreign_key_constraint(:user_id)

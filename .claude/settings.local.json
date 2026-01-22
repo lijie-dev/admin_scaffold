@@ -30,7 +30,17 @@
       "Skill(browser)",
       "Bash(node:*)",
       "Bash(mix test:*)",
-      "Bash(mix format:*)"
+      "Bash(mix format:*)",
+      "Skill(elixir-quality-gate)",
+      "Bash(curl:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__wait_for",
+      "Bash(pkill:*)"
     ]
   }
 }
