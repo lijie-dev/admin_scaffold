@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html lang="zh-CN" class="[scrollbar-gutter:stable]">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="管理后台" suffix=" · 管理系统">
+    <.live_title default="管理后台" suffix=" · Aurora Admin">
       {assigns[:page_title]}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
@@ -14,411 +14,253 @@
     </script>
 
     <script>
-      // Sidebar toggle functionality
+      (function() {
+        const theme = localStorage.getItem('theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <%= if @current_scope do %>
+      <div class="min-h-screen flex" style="background: var(--color-bg-primary);">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="aurora-sidebar h-screen sticky top-0">
+          <!-- Logo -->
+          <div class="p-5" style="border-bottom: 1px solid var(--color-border);">
+            <div class="flex items-center gap-3">
+              <div class="aurora-avatar" style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);">
+                A
+              </div>
+              <div class="aurora-sidebar-text transition-all duration-200">
+                <div style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 700; color: var(--color-text-primary);">
+                  Aurora
+                </div>
+                <div style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                  Admin Panel
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 导航 -->
+          <nav class="flex-1 p-3 overflow-y-auto">
+            <div class="aurora-sidebar-text mb-2 px-3">
+              <span style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted);">
+                主菜单
+              </span>
+            </div>
+
+            <.link navigate={~p"/dashboard"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 12a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z" />
+              </svg>
+              <span class="aurora-sidebar-text">仪表盘</span>
+            </.link>
+
+            <.link navigate={~p"/admin/users"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="aurora-sidebar-text">用户管理</span>
+            </.link>
+
+            <.link navigate={~p"/admin/roles"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span class="aurora-sidebar-text">角色管理</span>
+            </.link>
+
+            <.link navigate={~p"/admin/permissions"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              <span class="aurora-sidebar-text">权限管理</span>
+            </.link>
+
+            <.link navigate={~p"/admin/menus"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              <span class="aurora-sidebar-text">菜单管理</span>
+            </.link>
+
+            <div class="aurora-sidebar-text mt-6 mb-2 px-3">
+              <span style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted);">
+                系统
+              </span>
+            </div>
+
+            <.link navigate={~p"/admin/audit-logs"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              <span class="aurora-sidebar-text">审计日志</span>
+            </.link>
+
+            <.link navigate={~p"/users/settings"} class="aurora-nav-item">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="aurora-sidebar-text">系统设置</span>
+            </.link>
+          </nav>
+
+          <!-- 用户信息 -->
+          <div class="p-3" style="border-top: 1px solid var(--color-border);">
+            <div class="aurora-sidebar-text mb-3">
+              <div class="flex items-center gap-3 p-2 rounded-xl" style="background: var(--color-bg-secondary);">
+                <div class="aurora-avatar aurora-avatar-sm">
+                  {String.first(@current_scope.user.email) |> String.upcase()}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p style="font-size: 0.8125rem; font-weight: 500; color: var(--color-text-primary);" class="truncate">
+                    {@current_scope.user.email}
+                  </p>
+                  <p class="flex items-center gap-1" style="font-size: 0.6875rem; color: var(--color-success);">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background: var(--color-success);"></span>
+                    在线
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button id="sidebar-toggle" class="aurora-btn aurora-btn-secondary w-full">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+              <span class="aurora-sidebar-text text-xs">收起</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col min-w-0">
+          <!-- 顶部导航栏 -->
+          <header class="sticky top-0 z-40" style="background: var(--color-bg-surface); border-bottom: 1px solid var(--color-border);">
+            <div class="flex items-center justify-between px-6 py-3">
+              <!-- 移动端菜单 & 面包屑 -->
+              <div class="flex items-center gap-4">
+                <button id="mobile-menu-toggle" class="md:hidden aurora-btn aurora-btn-ghost aurora-btn-icon">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <nav class="flex items-center gap-2" style="font-size: 0.875rem;">
+                  <span style="color: var(--color-text-muted);">Aurora</span>
+                  <svg class="w-4 h-4" style="color: var(--color-text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                  <span style="font-weight: 500; color: var(--color-text-primary);">{assigns[:page_title] || "仪表盘"}</span>
+                </nav>
+              </div>
+
+              <!-- 操作按钮 -->
+              <div class="flex items-center gap-2">
+                <button id="theme-toggle" class="aurora-theme-toggle" title="切换主题">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </button>
+
+                <button class="aurora-theme-toggle relative" title="通知">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span class="absolute -top-1 -right-1 w-4 h-4 text-xs font-medium rounded-full flex items-center justify-center" style="background: var(--color-error); color: white;">
+                    3
+                  </span>
+                </button>
+
+                <.link href={~p"/users/log-out"} method="delete" class="aurora-btn aurora-btn-ghost aurora-btn-sm">
+                  退出
+                </.link>
+              </div>
+            </div>
+          </header>
+
+          <!-- 页面内容 -->
+          <main class="flex-1 p-6" style="background: var(--color-bg-primary);">
+            <Layouts.flash_group flash={@flash} />
+            {@inner_content}
+          </main>
+        </div>
+      </div>
+    <% else %>
+      <!-- 未登录 - 认证页面 -->
+      <div class="min-h-screen flex items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);">
+        <!-- 装饰背景 -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-30" style="background: radial-gradient(circle, #6366F1 0%, transparent 70%); filter: blur(60px);"></div>
+          <div class="absolute bottom-0 right-1/4 w-96 h-96 rounded-full opacity-20" style="background: radial-gradient(circle, #8B5CF6 0%, transparent 70%); filter: blur(60px);"></div>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10" style="background: radial-gradient(circle, #06B6D4 0%, transparent 70%); filter: blur(80px);"></div>
+        </div>
+
+        <div class="relative z-10 w-full">
+          <Layouts.flash_group flash={@flash} />
+          {@inner_content}
+        </div>
+      </div>
+    <% end %>
+
+    <!-- 移动端遮罩 -->
+    <div id="mobile-overlay" class="fixed inset-0 z-40 hidden md:hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"></div>
+
+    <!-- 移动端关闭按钮 -->
+    <button id="mobile-menu-close" class="fixed top-4 right-4 z-50 aurora-btn aurora-btn-icon hidden md:hidden" style="background: var(--color-error); color: white;">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <script>
       document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('sidebar-toggle');
         const mobileToggle = document.getElementById('mobile-menu-toggle');
         const mobileClose = document.getElementById('mobile-menu-close');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const themeToggle = document.getElementById('theme-toggle');
 
         if (toggleBtn && sidebar) {
           toggleBtn.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
           });
-
-          // Restore sidebar state
           if (localStorage.getItem('sidebarCollapsed') === 'true') {
             sidebar.classList.add('collapsed');
           }
         }
 
-        // Mobile menu toggle
-        if (mobileToggle && sidebar) {
-          mobileToggle.addEventListener('click', function() {
-            sidebar.classList.add('mobile-open');
-          });
+        function openMobileMenu() {
+          if (sidebar) sidebar.classList.add('mobile-open');
+          if (mobileOverlay) mobileOverlay.classList.remove('hidden');
+          if (mobileClose) mobileClose.classList.remove('hidden');
         }
 
-        if (mobileClose && sidebar) {
-          mobileClose.addEventListener('click', function() {
-            sidebar.classList.remove('mobile-open');
+        function closeMobileMenu() {
+          if (sidebar) sidebar.classList.remove('mobile-open');
+          if (mobileOverlay) mobileOverlay.classList.add('hidden');
+          if (mobileClose) mobileClose.classList.add('hidden');
+        }
+
+        if (mobileToggle) mobileToggle.addEventListener('click', openMobileMenu);
+        if (mobileClose) mobileClose.addEventListener('click', closeMobileMenu);
+        if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
+
+        if (themeToggle) {
+          themeToggle.addEventListener('click', function() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
           });
         }
       });
     </script>
-
-    <style>
-      /* SaaS Tech Design System */
-      :root {
-        --color-primary: #3b82f6;
-        --color-primary-dark: #2563eb;
-        --color-secondary: #64748b;
-        --color-accent: #06b6d4;
-        --color-success: #10b981;
-        --color-warning: #f59e0b;
-        --color-error: #ef4444;
-        --bg-primary: #ffffff;
-        --bg-secondary: #f8fafc;
-        --bg-dark: #0f172a;
-        --text-primary: #0f172a;
-        --text-secondary: #64748b;
-        --border-color: #e2e8f0;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      }
-
-      #sidebar {
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #sidebar.collapsed {
-        width: 5rem;
-      }
-
-      #sidebar.collapsed .nav-text,
-      #sidebar.collapsed .logo-text,
-      #sidebar.collapsed .user-info {
-        opacity: 0;
-        width: 0;
-        overflow: hidden;
-      }
-
-      #sidebar.collapsed .nav-link {
-        justify-content: center;
-      }
-
-      @media (max-width: 768px) {
-        #sidebar {
-          position: fixed;
-          left: -100%;
-          z-index: 50;
-          transition: left 0.3s ease;
-        }
-
-        #sidebar.mobile-open {
-          left: 0;
-        }
-      }
-
-      .saas-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem;
-        box-shadow: var(--shadow-sm);
-        transition: all 0.2s ease;
-      }
-
-      .saas-card:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
-      }
-
-      .saas-btn {
-        border-radius: 0.5rem;
-        font-weight: 500;
-        transition: all 0.15s ease;
-      }
-
-      .saas-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
-      }
-    </style>
-  </head>
-
-  <body class="antialiased bg-slate-50">
-    <%= if @current_scope do %>
-      <div class="min-h-screen flex">
-        <!-- 侧边栏 -->
-        <aside
-          id="sidebar"
-          class="w-64 bg-white flex flex-col border-r border-slate-200 h-screen sticky top-0 shadow-sm"
-        >
-          <!-- Logo & Brand -->
-          <div class="p-6 border-b border-slate-200">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                A
-              </div>
-
-              <div class="logo-text transition-all duration-300">
-                <div class="text-xl font-bold text-slate-900">管理系统</div>
-
-                <div class="text-xs text-slate-500">Admin v2.0</div>
-              </div>
-            </div>
-          </div>
-          <!-- Navigation -->
-          <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-            <.link
-              navigate={~p"/dashboard"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">仪表板</span>
-            </.link>
-            <.link
-              navigate={~p"/admin/users"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">用户管理</span>
-            </.link>
-            <.link
-              navigate={~p"/admin/roles"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">角色管理</span>
-            </.link>
-            <.link
-              navigate={~p"/admin/permissions"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">权限管理</span>
-            </.link>
-            <.link
-              navigate={~p"/admin/menus"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">菜单管理</span>
-            </.link>
-            <.link
-              navigate={~p"/users/settings"}
-              class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all duration-200 group"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-               <span class="nav-text font-medium transition-all duration-300">系统设置</span>
-            </.link>
-          </nav>
-          <!-- User Info & Toggle -->
-          <div class="p-4 border-t border-slate-200">
-            <div class="user-info mb-3 transition-all duration-300">
-              <div class="flex items-center gap-3 px-2">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-semibold">
-                  {String.first(@current_scope.user.email) |> String.upcase()}
-                </div>
-
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-slate-900 truncate">
-                    {@current_scope.user.email}
-                  </p>
-
-                  <p class="text-xs flex items-center gap-1 text-green-600">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> <span>在线</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <button
-              id="sidebar-toggle"
-              class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                />
-              </svg>
-               <span class="text-xs">收起</span>
-            </button>
-          </div>
-        </aside>
-        <!-- 主内容区 -->
-        <div class="flex-1 flex flex-col min-w-0">
-          <!-- 顶部导航栏 -->
-          <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-            <div class="flex items-center justify-between px-6 py-4">
-              <!-- Mobile Menu Toggle & Breadcrumb -->
-              <div class="flex items-center gap-4">
-                <button
-                  id="mobile-menu-toggle"
-                  class="md:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600"
-                >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="font-medium text-slate-500">管理后台</span>
-                  <span class="text-slate-300">/</span>
-                  <span class="font-semibold text-slate-900">{assigns[:page_title] || "首页"}</span>
-                </div>
-              </div>
-              <!-- Actions -->
-              <div class="flex items-center gap-3">
-                <!-- Search -->
-                <button class="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                   <span class="text-sm font-medium">搜索</span>
-                </button>
-                <!-- Notifications -->
-                <button class="relative p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-                <!-- Settings -->
-                <.link
-                  href={~p"/users/settings"}
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
-                >
-                  设置
-                </.link>
-                <!-- Logout -->
-                <.link
-                  href={~p"/users/log-out"}
-                  method="delete"
-                  class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-colors"
-                >
-                  退出
-                </.link>
-              </div>
-            </div>
-          </header>
-          <!-- 页面内容 -->
-          <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
-            <Layouts.flash_group flash={@flash} /> {@inner_content}
-          </main>
-        </div>
-      </div>
-    <% else %>
-      <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 relative overflow-hidden">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-10">
-          <div class="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
-
-          <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500 rounded-full blur-3xl">
-          </div>
-        </div>
-
-        <div class="relative z-10">
-          <Layouts.flash_group flash={@flash} />
-          {@inner_content}
-        </div>
-      </div>
-    <% end %>
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden">
-    </div>
-    <!-- Close button for mobile sidebar -->
-    <button
-      id="mobile-menu-close"
-      class="fixed top-4 right-4 z-50 brutal-btn bg-red-500 text-white p-2 hidden md:hidden"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    </button>
   </body>
 </html>

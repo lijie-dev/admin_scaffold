@@ -7,21 +7,24 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-sm">
-        <div class="text-center">
-          <.header>
-            Register for an account
-            <:subtitle>
-              Already registered?
-              <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
-                Log in
-              </.link>
-              to your account now.
-            </:subtitle>
-          </.header>
+    <div class="w-full max-w-md mx-auto px-6">
+      <div class="aurora-card p-8" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);">
+        <!-- 标题 -->
+        <div class="text-center mb-8">
+          <div class="aurora-avatar aurora-avatar-xl mx-auto mb-5" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 style="font-size: 1.75rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem;">
+            创建账户
+          </h1>
+          <p style="color: #64748B; font-size: 0.9375rem;">
+            填写以下信息开始使用
+          </p>
         </div>
-        
+
+        <!-- 注册表单 -->
         <.form
           for={@form}
           id="registration_form"
@@ -29,28 +32,63 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
           phx-submit="save"
           phx-change="validate"
         >
-          <.input
-            field={@form[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            required
-            phx-mounted={JS.focus()}
-          />
-          <.input
-            field={@form[:password]}
-            type="password"
-            label="Password"
-            autocomplete="new-password"
-            required
-          />
-          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-            Create an account
-          </.button>
+          <div class="aurora-form-group">
+            <label class="aurora-label">邮箱地址</label>
+            <input
+              type="email"
+              name={@form[:email].name}
+              value={Phoenix.HTML.Form.normalize_value("email", @form[:email].value)}
+              autocomplete="username"
+              required
+              phx-mounted={JS.focus()}
+              class="aurora-input"
+              placeholder="your@email.com"
+            />
+            <.error :for={msg <- Enum.map(@form[:email].errors, &translate_error/1)}>
+              {msg}
+            </.error>
+          </div>
+
+          <div class="aurora-form-group">
+            <label class="aurora-label">密码</label>
+            <input
+              type="password"
+              name={@form[:password].name}
+              value={Phoenix.HTML.Form.normalize_value("password", @form[:password].value)}
+              autocomplete="new-password"
+              required
+              class="aurora-input"
+              placeholder="至少8个字符"
+            />
+            <.error :for={msg <- Enum.map(@form[:password].errors, &translate_error/1)}>
+              {msg}
+            </.error>
+          </div>
+
+          <button type="submit" phx-disable-with="创建中..." class="aurora-btn aurora-btn-primary w-full">
+            创建账户
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
         </.form>
+
+        <!-- 登录链接 -->
+        <p class="text-center mt-6" style="font-size: 0.875rem; color: #64748B;">
+          已有账户？
+          <.link navigate={~p"/users/log-in"} style="color: #6366F1; font-weight: 600;">
+            立即登录
+          </.link>
+        </p>
       </div>
-    </Layouts.app>
+    </div>
     """
+  end
+
+  defp translate_error({msg, opts}) do
+    Enum.reduce(opts, msg, fn {key, value}, acc ->
+      String.replace(acc, "%{#{key}}", fn _ -> to_string(value) end)
+    end)
   end
 
   @impl true
@@ -61,7 +99,6 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
 
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_registration(%User{})
-
     {:ok, assign_form(socket, changeset), temporary_assigns: [form: nil]}
   end
 
@@ -77,10 +114,7 @@ defmodule AdminScaffoldWeb.UserLive.Registration do
 
         {:noreply,
          socket
-         |> put_flash(
-           :info,
-           "An email was sent to #{user.email}, please access it to confirm your account."
-         )
+         |> put_flash(:info, "注册成功！请查收邮件确认您的账户。")
          |> push_navigate(to: ~p"/users/log-in")}
 
       {:error, %Ecto.Changeset{} = changeset} ->

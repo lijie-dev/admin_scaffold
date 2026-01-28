@@ -50,147 +50,80 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-7xl mx-auto">
-      <!-- Header - SaaS Style -->
-      <div class="bg-white p-8 mb-8 rounded-xl shadow-sm border border-slate-200">
+    <div class="aurora-container">
+      <!-- 页面头部 -->
+      <div class="aurora-card p-6 mb-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex-1">
-            <h1 class="text-4xl font-bold mb-2 text-slate-900">权限管理</h1>
-
-            <p class="text-lg flex items-center gap-2 text-slate-600">
+          <div>
+            <h1 class="aurora-section-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">权限管理</h1>
+            <p style="color: var(--color-text-secondary);">
               配置系统权限和访问控制
-              <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-                ACL
-              </span>
+              <span class="aurora-badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981; margin-left: 8px;">ACL</span>
             </p>
           </div>
-
           <div class="flex gap-3">
-            <.link
-              navigate={~p"/dashboard"}
-              class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
+            <.link navigate={~p"/dashboard"} class="aurora-btn aurora-btn-secondary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              返回仪表板
+              返回
             </.link>
-            <.link
-              patch={~p"/admin/permissions/new"}
-              class="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                />
+            <.link patch={~p"/admin/permissions/new"} class="aurora-btn aurora-btn-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
               新建权限
             </.link>
           </div>
         </div>
       </div>
-      <!-- Permissions Grid -->
-      <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        id="permissions"
-        phx-update="stream"
-      >
-        <div
-          :for={{dom_id, permission} <- @streams.permissions}
-          id={dom_id}
-          class="bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-all p-6"
-        >
-          <!-- Permission Icon -->
-          <div class="mb-4 flex justify-center">
-            <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg
-                class="w-8 h-8 text-orange-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
+      <!-- 权限卡片网格 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="permissions" phx-update="stream">
+        <div :for={{dom_id, permission} <- @streams.permissions} id={dom_id} class="aurora-card p-5">
+          <!-- 权限图标 -->
+          <div class="flex justify-center mb-4">
+            <div class="aurora-stat-card-icon" style="background: rgba(16, 185, 129, 0.1);">
+              <svg class="w-6 h-6" style="color: #10B981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
           </div>
-          <!-- Permission Name -->
-          <h3 class="text-lg font-semibold mb-2 text-center text-slate-900">{permission.name}</h3>
-          <!-- Permission Slug -->
-          <div class="mb-3 p-2 text-center bg-slate-50 rounded-lg">
-            <p class="text-xs font-mono text-orange-600">{permission.slug}</p>
+          <!-- 权限名称 -->
+          <h3 class="text-center mb-2" style="font-size: 1rem; font-weight: 600; color: var(--color-text-primary);">{permission.name}</h3>
+          <!-- 权限标识 -->
+          <div class="mb-3 p-2 rounded-lg text-center" style="background: var(--color-bg-muted);">
+            <code style="font-size: 0.75rem; color: #10B981;">{permission.slug}</code>
           </div>
-          <!-- Permission Description -->
-          <p class="text-xs mb-4 text-center min-h-[2.5rem] text-slate-600">
+          <!-- 权限描述 -->
+          <p class="text-center mb-4" style="font-size: 0.8125rem; color: var(--color-text-secondary); min-height: 2.5rem;">
             {permission.description || "暂无描述"}
           </p>
-          <!-- Actions -->
+          <!-- 操作按钮 -->
           <div class="flex gap-2">
-            <.link
-              patch={~p"/admin/permissions/#{permission.id}/edit"}
-              class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-center text-xs rounded-lg transition-colors"
-            >
+            <.link patch={~p"/admin/permissions/#{permission.id}/edit"} class="aurora-btn aurora-btn-primary flex-1" style="justify-content: center; padding: 8px 12px; font-size: 0.8125rem;">
               编辑
             </.link>
-            <button
-              phx-click="delete"
-              phx-value-id={permission.id}
-              data-confirm="确定要删除这个权限吗？"
-              class="px-3 py-2 bg-pink-600 hover:bg-pink-700 text-white font-medium text-xs rounded-lg transition-colors"
-            >
+            <button phx-click="delete" phx-value-id={permission.id} data-confirm="确定要删除这个权限吗？" class="aurora-btn aurora-btn-ghost-danger" style="padding: 8px 12px; font-size: 0.8125rem;">
               删除
             </button>
           </div>
         </div>
       </div>
-      <!-- Empty State -->
-      <div
-        :if={@streams.permissions.inserts == []}
-        class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center"
-      >
-        <div class="w-24 h-24 mx-auto mb-6 bg-orange-100 rounded-xl flex items-center justify-center">
-          <div class="w-full h-full flex items-center justify-center">
-            <svg
-              class="w-12 h-12 text-orange-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <h3 class="text-2xl font-semibold mb-2 text-slate-900">暂无权限</h3>
-
-        <p class="mb-6 text-slate-600">点击上方"新建权限"按钮创建第一个权限</p>
-
-        <.link
-          patch={~p"/admin/permissions/new"}
-          class="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium inline-flex items-center gap-2 rounded-lg transition-colors"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      <!-- 空状态 -->
+      <div :if={@streams.permissions.inserts == []} class="aurora-card p-12">
+        <div class="aurora-empty">
+          <svg class="aurora-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          创建权限
-        </.link>
+          <p class="aurora-empty-title">暂无权限</p>
+          <p class="aurora-empty-desc mb-6">点击上方"新建权限"按钮创建第一个权限</p>
+          <.link patch={~p"/admin/permissions/new"} class="aurora-btn aurora-btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            创建权限
+          </.link>
+        </div>
       </div>
     </div>
     <!-- Modal for New/Edit Permission -->
