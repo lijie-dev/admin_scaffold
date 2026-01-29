@@ -120,27 +120,14 @@ defmodule AdminScaffoldWeb.UserAuth do
 
   # Do not renew session if the user is already logged in
   # to prevent CSRF errors or data being lost in tabs that are still open
-  defp renew_session(conn, user) when conn.assigns.current_scope.user.id == user.id do
-    conn
+  defp renew_session(conn, user) do
+    case conn.assigns do
+      %{current_scope: %{user: %{id: id}}} when id == user.id -> conn
+      _ -> do_renew_session(conn)
+    end
   end
 
-  # This function renews the session ID and erases the whole
-  # session to avoid fixation attacks. If there is any data
-  # in the session you may want to preserve after log in/log out,
-  # you must explicitly fetch the session data before clearing
-  # and then immediately set it after clearing, for example:
-  #
-  #     defp renew_session(conn, _user) do
-  #       delete_csrf_token()
-  #       preferred_locale = get_session(conn, :preferred_locale)
-  #
-  #       conn
-  #       |> configure_session(renew: true)
-  #       |> clear_session()
-  #       |> put_session(:preferred_locale, preferred_locale)
-  #     end
-  #
-  defp renew_session(conn, _user) do
+  defp do_renew_session(conn) do
     delete_csrf_token()
 
     conn
@@ -257,12 +244,12 @@ defmodule AdminScaffoldWeb.UserAuth do
   end
 
   @doc "Returns the path to redirect to after log in."
-  # the user was already logged in, redirect to settings
+  # the user was already logged in, redirect to dashboard
   def signed_in_path(%Plug.Conn{assigns: %{current_scope: %Scope{user: %Accounts.User{}}}}) do
-    ~p"/users/settings"
+    ~p"/dashboard"
   end
 
-  def signed_in_path(_), do: ~p"/"
+  def signed_in_path(_), do: ~p"/dashboard"
 
   @doc """
   Plug for routes that require the user to be authenticated.

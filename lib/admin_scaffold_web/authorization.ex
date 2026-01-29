@@ -6,6 +6,8 @@ defmodule AdminScaffoldWeb.Authorization do
   """
 
   import Phoenix.LiveView
+  import Phoenix.Component, only: [assign: 3]
+  require Logger
 
   alias AdminScaffold.Accounts
 
@@ -26,11 +28,16 @@ defmodule AdminScaffoldWeb.Authorization do
     user = get_current_user(socket)
 
     if Accounts.has_permission?(user, permission_slug) do
-      socket
+      assign(socket, :authorized, true)
     else
+      # 记录权限检查失败
+      user_info = if user, do: "user_id=#{user.id}, email=#{user.email}", else: "anonymous"
+      Logger.warning("Permission denied: #{user_info} attempted to access resource requiring '#{permission_slug}'")
+
       socket
+      |> assign(:authorized, false)
       |> put_flash(:error, "您没有权限访问此页面")
-      |> redirect(to: "/dashboard")
+      |> push_navigate(to: "/dashboard")
     end
   end
 

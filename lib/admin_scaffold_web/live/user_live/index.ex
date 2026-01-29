@@ -7,7 +7,12 @@ defmodule AdminScaffoldWeb.UserLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket = Authorization.require_permission(socket, "users.manage")
-    {:ok, stream(socket, :users, Accounts.list_users())}
+
+    if connected?(socket) do
+      {:ok, stream(socket, :users, Accounts.list_users())}
+    else
+      {:ok, stream(socket, :users, [])}
+    end
   end
 
   @impl true
@@ -30,10 +35,6 @@ defmodule AdminScaffoldWeb.UserLive.Index do
   @impl true
   def handle_info({AdminScaffoldWeb.UserLive.FormComponent, {:saved, _user}}, socket) do
     {:noreply, stream(socket, :users, Accounts.list_users(), reset: true)}
-  end
-
-  def handle_info({AdminScaffoldWeb.UserLive.FormComponent, :closed}, socket) do
-    {:noreply, socket}
   end
 
   @impl true

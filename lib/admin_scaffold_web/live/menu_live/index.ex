@@ -3,10 +3,17 @@ defmodule AdminScaffoldWeb.MenuLive.Index do
 
   alias AdminScaffold.Accounts
   alias AdminScaffold.Accounts.Menu
+  alias AdminScaffoldWeb.Authorization
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :menus, Accounts.list_menus())}
+    socket = Authorization.require_permission(socket, "menus.manage")
+
+    if connected?(socket) do
+      {:ok, stream(socket, :menus, Accounts.list_menus())}
+    else
+      {:ok, stream(socket, :menus, [])}
+    end
   end
 
   @impl true

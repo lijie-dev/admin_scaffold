@@ -52,14 +52,12 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
         </div>
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
-          <button
-            type="button"
-            phx-click="close"
-            phx-target={@myself}
+          <.link
+            patch={@patch}
             class="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors"
           >
             取消
-          </button>
+          </.link>
           <button
             type="submit"
             class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
@@ -95,11 +93,6 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
 
   def handle_event("save", %{"user" => user_params}, socket) do
     save_user(socket, socket.assigns.action, user_params)
-  end
-
-  def handle_event("close", _params, socket) do
-    notify_parent(:closed)
-    {:noreply, socket}
   end
 
   defp save_user(socket, :edit, user_params) do

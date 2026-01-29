@@ -9,11 +9,15 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
   def mount(_params, _session, socket) do
     socket = Authorization.require_permission(socket, "roles.manage")
 
-    roles =
-      Accounts.list_roles()
-      |> Enum.map(&preload_role_associations/1)
+    if connected?(socket) do
+      roles =
+        Accounts.list_roles()
+        |> Enum.map(&preload_role_associations/1)
 
-    {:ok, stream(socket, :roles, roles)}
+      {:ok, stream(socket, :roles, roles)}
+    else
+      {:ok, stream(socket, :roles, [])}
+    end
   end
 
   defp preload_role_associations(role) do
@@ -90,6 +94,18 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
       </div>
       <!-- 角色卡片网格 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="roles" phx-update="stream">
+        <!-- 空状态 - 使用 only: 变体 -->
+        <div class="hidden only:block col-span-full">
+          <div class="aurora-card p-12">
+            <div class="aurora-empty">
+              <svg class="aurora-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p class="aurora-empty-title">暂无角色</p>
+              <p class="aurora-empty-desc mb-6">点击上方"新建角色"按钮创建第一个角色</p>
+            </div>
+          </div>
+        </div>
         <div :for={{dom_id, role} <- @streams.roles} id={dom_id} class="aurora-card p-6">
           <!-- 角色头部 -->
           <div class="flex items-start justify-between mb-4">
@@ -134,22 +150,6 @@ defmodule AdminScaffoldWeb.RoleLive.Index do
               删除
             </button>
           </div>
-        </div>
-      </div>
-      <!-- 空状态 -->
-      <div :if={@streams.roles.inserts == []} class="aurora-card p-12">
-        <div class="aurora-empty">
-          <svg class="aurora-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <p class="aurora-empty-title">暂无角色</p>
-          <p class="aurora-empty-desc mb-6">点击上方"新建角色"按钮创建第一个角色</p>
-          <.link patch={~p"/admin/roles/new"} class="aurora-btn aurora-btn-primary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            创建角色
-          </.link>
         </div>
       </div>
     </div>

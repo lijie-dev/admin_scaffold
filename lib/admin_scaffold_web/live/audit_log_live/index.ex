@@ -7,7 +7,12 @@ defmodule AdminScaffoldWeb.AuditLogLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket = Authorization.require_permission(socket, "audit_logs.view")
-    {:ok, stream(socket, :audit_logs, System.list_audit_logs(limit: 100))}
+
+    if connected?(socket) do
+      {:ok, stream(socket, :audit_logs, System.list_audit_logs(limit: 100))}
+    else
+      {:ok, stream(socket, :audit_logs, [])}
+    end
   end
 
   @impl true

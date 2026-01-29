@@ -456,6 +456,7 @@ defmodule AdminScaffold.Accounts do
          |> Repo.update() do
       {:ok, updated_role} = result ->
         System.log_action(current_user, "update", "Role", updated_role.id, attrs, metadata)
+        clear_role_users_cache(updated_role.id)
         result
 
       error ->
@@ -467,6 +468,9 @@ defmodule AdminScaffold.Accounts do
   Deletes a role.
   """
   def delete_role(%Role{} = role, current_user \\ nil, metadata \\ %{}) do
+    # 先清除缓存，因为删除后无法获取关联的用户
+    clear_role_users_cache(role.id)
+
     case Repo.delete(role) do
       {:ok, deleted_role} = result ->
         System.log_action(

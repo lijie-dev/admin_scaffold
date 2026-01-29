@@ -8,7 +8,12 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket = Authorization.require_permission(socket, "permissions.manage")
-    {:ok, stream(socket, :permissions, Accounts.list_permissions())}
+
+    if connected?(socket) do
+      {:ok, stream(socket, :permissions, Accounts.list_permissions())}
+    else
+      {:ok, stream(socket, :permissions, [])}
+    end
   end
 
   @impl true
@@ -79,6 +84,18 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
       </div>
       <!-- 权限卡片网格 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="permissions" phx-update="stream">
+        <!-- 空状态 - 使用 only: 变体 -->
+        <div class="hidden only:block col-span-full">
+          <div class="aurora-card p-12">
+            <div class="aurora-empty">
+              <svg class="aurora-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <p class="aurora-empty-title">暂无权限</p>
+              <p class="aurora-empty-desc mb-6">点击上方"新建权限"按钮创建第一个权限</p>
+            </div>
+          </div>
+        </div>
         <div :for={{dom_id, permission} <- @streams.permissions} id={dom_id} class="aurora-card p-5">
           <!-- 权限图标 -->
           <div class="flex justify-center mb-4">
@@ -107,22 +124,6 @@ defmodule AdminScaffoldWeb.PermissionLive.Index do
               删除
             </button>
           </div>
-        </div>
-      </div>
-      <!-- 空状态 -->
-      <div :if={@streams.permissions.inserts == []} class="aurora-card p-12">
-        <div class="aurora-empty">
-          <svg class="aurora-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <p class="aurora-empty-title">暂无权限</p>
-          <p class="aurora-empty-desc mb-6">点击上方"新建权限"按钮创建第一个权限</p>
-          <.link patch={~p"/admin/permissions/new"} class="aurora-btn aurora-btn-primary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            创建权限
-          </.link>
         </div>
       </div>
     </div>

@@ -20,6 +20,7 @@ defmodule AdminScaffold.Seeds do
     create_test_roles()
     create_test_permissions()
     create_test_menus()
+    assign_admin_role_and_permissions()
     create_test_pages()
   end
 
@@ -80,13 +81,23 @@ defmodule AdminScaffold.Seeds do
     alias AdminScaffold.Accounts.Permission
 
     permissions = [
+      # 用户管理权限
+      %{name: "用户管理", slug: "users.manage", description: "管理所有用户"},
       %{name: "查看用户", slug: "user.view", description: "查看用户"},
       %{name: "创建用户", slug: "user.create", description: "创建用户"},
       %{name: "编辑用户", slug: "user.edit", description: "编辑用户"},
       %{name: "删除用户", slug: "user.delete", description: "删除用户"},
+      # 角色管理权限
+      %{name: "角色管理", slug: "roles.manage", description: "管理所有角色"},
       %{name: "查看角色", slug: "role.view", description: "查看角色"},
       %{name: "编辑角色", slug: "role.edit", description: "编辑角色"},
-      %{name: "查看权限", slug: "permission.view", description: "查看权限"}
+      # 权限管理权限
+      %{name: "权限管理", slug: "permissions.manage", description: "管理所有权限"},
+      %{name: "查看权限", slug: "permission.view", description: "查看权限"},
+      # 菜单管理权限
+      %{name: "菜单管理", slug: "menus.manage", description: "管理系统菜单"},
+      # 审计日志权限
+      %{name: "查看审计日志", slug: "audit_logs.view", description: "查看审计日志"}
     ]
 
     for perm_attrs <- permissions do
@@ -119,6 +130,81 @@ defmodule AdminScaffold.Seeds do
       unless Repo.get_by(Menu, path: menu_attrs.path) do
         Accounts.create_menu(menu_attrs)
         IO.puts("✓ 菜单已创建: #{menu_attrs.name}")
+      end
+    end
+  end
+
+  defp assign_admin_role_and_permissions do
+    alias AdminScaffold.Accounts.{Role, Permission, User}
+    import Ecto.Query
+
+    # 获取管理员用户
+    admin_user = Repo.get_by(User, email: "admin@admin.com")
+    # 获取管理员角色
+    admin_role = Repo.get_by(Role, name: "管理员")
+
+    if admin_user && admin_role do
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+      # 为管理员角色分配所有权限
+      all_permissions = Repo.all(Permission)
+
+      for permission <- all_permissions do
+        unless Repo.exists?(
+                 from(rp in "role_permissions",
+                   where: rp.role_id == ^admin_role.id and rp.permission_id == ^permission.id
+                 )
+               ) do
+          Repo.insert_all("role_permissions", [
+            %{
+              role_id: admin_role.id,
+              permission_id: permission.id,
+              inserted_at: now,
+              updated_at: now
+            }
+          ])
+        end
+      end
+
+      IO.puts("✓ 已为管理员角色分配 #{length(all_permissions)} 个权限")
+
+      # 获取所有菜单
+      all_menus = Accounts.list_menus()
+
+      for menu <- all_menus do
+        unless Repo.exists?(
+                 from(rm in "role_menus",
+                   where: rm.role_id == ^admin_role.id and rm.menu_id == ^menu.id
+                 )
+               ) do
+          Repo.insert_all("role_menus", [
+            %{
+              role_id: admin_role.id,
+              menu_id: menu.id,
+              inserted_at: now,
+              updated_at: now
+            }
+          ])
+        end
+      end
+
+      IO.puts("✓ 已为管理员角色分配 #{length(all_menus)} 个菜单")
+
+      # 为管理员用户分配管理员角色
+      unless Repo.exists?(
+               from(ur in "user_roles",
+                 where: ur.user_id == ^admin_user.id and ur.role_id == ^admin_role.id
+               )
+             ) do
+        Repo.insert_all("user_roles", [
+          %{
+            user_id: admin_user.id,
+            role_id: admin_role.id,
+            inserted_at: now,
+            updated_at: now
+          }
+        ])
+        IO.puts("✓ 已为管理员用户分配管理员角色")
       end
     end
   end
