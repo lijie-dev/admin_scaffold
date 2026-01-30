@@ -130,6 +130,13 @@ defmodule AdminScaffold.Accounts do
   end
 
   @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user changes (for editing).
+  """
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.update_changeset(user, attrs)
+  end
+
+  @doc """
   Deletes a user.
 
   ## Examples

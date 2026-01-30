@@ -6,9 +6,9 @@ defmodule AdminScaffoldWeb.PermissionLive.FormComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4">{@title}</h2>
-      
+    <div>
+      <h2 class="aurora-section-title text-xl mb-4">{@title}</h2>
+
       <.form
         for={@form}
         id="permission-form"
@@ -17,48 +17,15 @@ defmodule AdminScaffoldWeb.PermissionLive.FormComponent do
         phx-submit="save"
         class="space-y-4"
       >
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">权限名称</label>
-          <input
-            type="text"
-            name="permission[name]"
-            value={@form[:name].value}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">权限标识</label>
-          <input
-            type="text"
-            name="permission[slug]"
-            value={@form[:slug].value}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label> <textarea
-            name="permission[description]"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            rows="3"
-          ><%= @form[:description].value %></textarea>
-        </div>
-        
-        <div class="flex justify-end gap-3">
-          <.link
-            patch={@patch}
-            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
-          >
+        <.input field={@form[:name]} type="text" label="权限名称" required />
+        <.input field={@form[:slug]} type="text" label="权限标识" required />
+        <.input field={@form[:description]} type="textarea" label="描述" rows="3" />
+
+        <div class="flex justify-end gap-3 pt-4" style="border-top: 1px solid var(--color-border);">
+          <.link patch={@patch} class="aurora-btn aurora-btn-secondary">
             取消
           </.link>
-          <button
-            type="submit"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            phx-disable-with="保存中..."
-          >
+          <button type="submit" class="aurora-btn aurora-btn-primary" phx-disable-with="保存中...">
             保存
           </button>
         </div>

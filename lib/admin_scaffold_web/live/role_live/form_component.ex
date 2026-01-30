@@ -6,9 +6,9 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4">{@title}</h2>
-      
+    <div>
+      <h2 class="aurora-section-title text-xl mb-4">{@title}</h2>
+
       <.form
         for={@form}
         id="role-form"
@@ -17,98 +17,69 @@ defmodule AdminScaffoldWeb.RoleLive.FormComponent do
         phx-submit="save"
         class="space-y-4"
       >
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">角色名称</label>
-          <input
-            type="text"
-            name="role[name]"
-            value={@form[:name].value}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">描述</label> <textarea
-            name="role[description]"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            rows="3"
-          ><%= @form[:description].value %></textarea>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
-          <select
-            name="role[status]"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          >
-            <option value="1" selected={@form[:status].value == 1}>启用</option>
-            
-            <option value="0" selected={@form[:status].value == 0}>禁用</option>
-          </select>
-        </div>
+        <.input field={@form[:name]} type="text" label="角色名称" required />
+        <.input field={@form[:description]} type="textarea" label="描述" rows="3" />
+        <.input
+          field={@form[:status]}
+          type="select"
+          label="状态"
+          options={[{"启用", 1}, {"禁用", 0}]}
+          required
+        />
         <!-- Permissions Section -->
-        <div>
-          <label class="text-sm font-medium text-slate-700 mb-2 block">权限配置</label>
-          <div class="border border-slate-200 rounded-lg p-4 max-h-60 overflow-y-auto">
+        <div class="aurora-form-group">
+          <label class="aurora-label">权限配置</label>
+          <div class="aurora-card p-4 max-h-60 overflow-y-auto">
             <div class="space-y-2">
-              <div :if={Enum.empty?(@permissions)} class="text-sm text-slate-500 py-4 text-center">
+              <div :if={Enum.empty?(@permissions)} style="color: var(--color-text-muted);" class="text-sm py-4 text-center">
                 暂无可用权限
               </div>
-              
               <div
                 :for={permission <- @permissions}
-                class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded"
+                class="flex items-center gap-2 p-2 rounded"
+                style="background: var(--color-bg-secondary);"
               >
                 <input
                   type="checkbox"
                   name="permissions[]"
                   value={permission.id}
                   checked={permission.id in @selected_permission_ids}
-                  class="w-4 h-4 text-blue-600 border-slate-300 rounded"
+                  class="w-4 h-4 rounded"
                 />
-                <label class="text-sm text-slate-700 cursor-pointer flex-1">{permission.name}</label>
-                <span class="text-xs text-slate-500">{permission.slug}</span>
+                <label style="color: var(--color-text-primary);" class="text-sm cursor-pointer flex-1">{permission.name}</label>
+                <span style="color: var(--color-text-muted);" class="text-xs">{permission.slug}</span>
               </div>
             </div>
           </div>
         </div>
         <!-- Menus Section -->
-        <div>
-          <label class="text-sm font-medium text-slate-700 mb-2 block">菜单配置</label>
-          <div class="border border-slate-200 rounded-lg p-4 max-h-60 overflow-y-auto">
+        <div class="aurora-form-group">
+          <label class="aurora-label">菜单配置</label>
+          <div class="aurora-card p-4 max-h-60 overflow-y-auto">
             <div class="space-y-2">
-              <div :if={Enum.empty?(@menus)} class="text-sm text-slate-500 py-4 text-center">
+              <div :if={Enum.empty?(@menus)} style="color: var(--color-text-muted);" class="text-sm py-4 text-center">
                 暂无可用菜单
               </div>
-              
-              <div :for={menu <- @menus} class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded">
+              <div :for={menu <- @menus} class="flex items-center gap-2 p-2 rounded" style="background: var(--color-bg-secondary);">
                 <input
                   type="checkbox"
                   name="menus[]"
                   value={menu.id}
                   checked={menu.id in @selected_menu_ids}
-                  class="w-4 h-4 text-blue-600 border-slate-300 rounded"
-                /> <label class="text-sm text-slate-700 cursor-pointer flex-1">{menu.name}</label>
-                <span class="text-xs text-slate-500">{menu.path}</span>
+                  class="w-4 h-4 rounded"
+                />
+                <label style="color: var(--color-text-primary);" class="text-sm cursor-pointer flex-1">{menu.name}</label>
+                <span style="color: var(--color-text-muted);" class="text-xs">{menu.path}</span>
               </div>
             </div>
           </div>
         </div>
-        
-        <div class="flex justify-end gap-3">
-          <.link
-            patch={@patch}
-            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
-          >
+
+        <div class="flex justify-end gap-3 pt-4" style="border-top: 1px solid var(--color-border);">
+          <.link patch={@patch} class="aurora-btn aurora-btn-secondary">
             取消
           </.link>
-          <button
-            type="submit"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            phx-disable-with="保存中..."
-          >
+          <button type="submit" class="aurora-btn aurora-btn-primary" phx-disable-with="保存中...">
             保存
           </button>
         </div>

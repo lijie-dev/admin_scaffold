@@ -6,123 +6,29 @@ defmodule AdminScaffoldWeb.MenuLive.FormComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="brutal-card p-6" style="background: var(--color-bg-card);">
-      <h2
-        class="text-2xl font-black mb-6"
-        style="font-family: var(--font-display); color: var(--color-text-primary);"
-      >
-        {@title}
-      </h2>
-      
+    <div>
+      <h2 class="aurora-section-title text-xl mb-4">{@title}</h2>
+
       <.form
         for={@form}
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
+        class="space-y-4"
       >
-        <div class="space-y-4">
-          <div>
-            <label
-              class="block text-sm font-bold mb-2"
-              style="color: var(--color-text-primary); font-family: var(--font-display);"
-            >
-              菜单名称
-            </label>
-            <input
-              type="text"
-              name="menu[name]"
-              value={@form[:name].value}
-              class="w-full px-4 py-2 brutal-btn"
-              style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-body);"
-              placeholder="请输入菜单名称"
-            />
-          </div>
-          
-          <div>
-            <label
-              class="block text-sm font-bold mb-2"
-              style="color: var(--color-text-primary); font-family: var(--font-display);"
-            >
-              菜单路径
-            </label>
-            <input
-              type="text"
-              name="menu[path]"
-              value={@form[:path].value}
-              class="w-full px-4 py-2 brutal-btn"
-              style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-mono);"
-              placeholder="/dashboard"
-            />
-          </div>
-          
-          <div>
-            <label
-              class="block text-sm font-bold mb-2"
-              style="color: var(--color-text-primary); font-family: var(--font-display);"
-            >
-              图标
-            </label>
-            <input
-              type="text"
-              name="menu[icon]"
-              value={@form[:icon].value}
-              class="w-full px-4 py-2 brutal-btn"
-              style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-mono);"
-              placeholder="hero-home"
-            />
-          </div>
-          
-          <div>
-            <label
-              class="block text-sm font-bold mb-2"
-              style="color: var(--color-text-primary); font-family: var(--font-display);"
-            >
-              排序
-            </label>
-            <input
-              type="number"
-              name="menu[sort]"
-              value={@form[:sort].value || 0}
-              class="w-full px-4 py-2 brutal-btn"
-              style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-mono);"
-            />
-          </div>
-          
-          <div>
-            <label
-              class="block text-sm font-bold mb-2"
-              style="color: var(--color-text-primary); font-family: var(--font-display);"
-            >
-              状态
-            </label>
-            <select
-              name="menu[status]"
-              class="w-full px-4 py-2 brutal-btn"
-              style="background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: var(--font-body);"
-            >
-              <option value="1" selected={@form[:status].value == 1}>启用</option>
-              
-              <option value="0" selected={@form[:status].value == 0}>禁用</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="flex gap-3 mt-6">
-          <button
-            type="submit"
-            phx-disable-with="保存中..."
-            class="flex-1 brutal-btn px-6 py-3 text-white font-bold"
-            style="background: var(--color-accent-green); font-family: var(--font-display);"
-          >
-            保存
-          </button>
-          <.link
-            patch={@patch}
-            class="brutal-btn px-6 py-3 text-white font-bold"
-            style="background: var(--color-bg-elevated); font-family: var(--font-display);"
-          >
+        <.input field={@form[:name]} type="text" label="菜单名称" placeholder="请输入菜单名称" />
+        <.input field={@form[:path]} type="text" label="菜单路径" placeholder="/dashboard" />
+        <.input field={@form[:icon]} type="text" label="图标" placeholder="hero-home" />
+        <.input field={@form[:sort]} type="number" label="排序" />
+        <.input field={@form[:status]} type="select" label="状态" options={[{"启用", 1}, {"禁用", 0}]} />
+
+        <div class="flex justify-end gap-3 pt-4" style="border-top: 1px solid var(--color-border);">
+          <.link patch={@patch} class="aurora-btn aurora-btn-secondary">
             取消
           </.link>
+          <button type="submit" class="aurora-btn aurora-btn-primary" phx-disable-with="保存中...">
+            保存
+          </button>
         </div>
       </.form>
     </div>

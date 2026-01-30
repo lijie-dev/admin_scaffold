@@ -6,63 +6,36 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="p-6">
-      <h2 class="text-2xl font-bold mb-6 text-slate-900">{@title}</h2>
-      
+    <div>
+      <h2 class="aurora-section-title text-xl mb-6">{@title}</h2>
+
       <.form
         for={@form}
         id="user-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
-        class="space-y-6"
+        class="space-y-4"
       >
-        <!-- Email Field -->
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">邮箱地址</label>
-          <input
-            type="email"
-            name="user[email]"
-            value={@form[:email].value}
-            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder="user@example.com"
-            required
-          />
-          <.error :for={msg <- @form[:email].errors}>
-            <span class="text-sm text-red-600 mt-1">{msg}</span>
-          </.error>
-        </div>
-        <!-- Status Field -->
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">状态</label>
-          <select
-            name="user[status]"
-            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            required
-          >
-            <option value="active" selected={@form[:status].value == "active"}>启用 (Active)</option>
-            
-            <option value="inactive" selected={@form[:status].value == "inactive"}>
-              禁用 (Inactive)
-            </option>
-          </select>
-          <.error :for={msg <- @form[:status].errors}>
-            <span class="text-sm text-red-600 mt-1">{msg}</span>
-          </.error>
-        </div>
-        <!-- Form Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
-          <.link
-            patch={@patch}
-            class="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors"
-          >
+        <.input
+          field={@form[:email]}
+          type="email"
+          label="邮箱地址"
+          placeholder="user@example.com"
+          required
+        />
+        <.input
+          field={@form[:status]}
+          type="select"
+          label="状态"
+          options={[{"启用 (Active)", "active"}, {"禁用 (Inactive)", "inactive"}]}
+          required
+        />
+        <div class="flex justify-end gap-3 pt-4" style="border-top: 1px solid var(--color-border);">
+          <.link patch={@patch} class="aurora-btn aurora-btn-secondary">
             取消
           </.link>
-          <button
-            type="submit"
-            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-            phx-disable-with="保存中..."
-          >
+          <button type="submit" class="aurora-btn aurora-btn-primary" phx-disable-with="保存中...">
             保存
           </button>
         </div>
@@ -72,8 +45,12 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
   end
 
   @impl true
-  def update(%{user: user} = assigns, socket) do
-    changeset = Accounts.change_user_registration(user)
+  def update(%{user: user, action: action} = assigns, socket) do
+    changeset =
+      case action do
+        :edit -> Accounts.change_user(user)
+        :new -> Accounts.change_user_registration(user)
+      end
 
     {:ok,
      socket
@@ -84,9 +61,17 @@ defmodule AdminScaffoldWeb.UserLive.FormComponent do
   @impl true
   def handle_event("validate", %{"user" => user_params}, socket) do
     changeset =
-      socket.assigns.user
-      |> Accounts.change_user_registration(user_params)
-      |> Map.put(:action, :validate)
+      case socket.assigns.action do
+        :edit ->
+          socket.assigns.user
+          |> Accounts.change_user(user_params)
+          |> Map.put(:action, :validate)
+
+        :new ->
+          socket.assigns.user
+          |> Accounts.change_user_registration(user_params)
+          |> Map.put(:action, :validate)
+      end
 
     {:noreply, assign_form(socket, changeset)}
   end

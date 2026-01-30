@@ -230,13 +230,13 @@ defmodule AdminScaffoldWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="aurora-form-group">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="aurora-label">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[@class || "aurora-input", @errors != [] && "border-red-500"]}
           multiple={@multiple}
           {@rest}
         >
@@ -251,15 +251,13 @@ defmodule AdminScaffoldWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="aurora-form-group">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span> <textarea
+        <span :if={@label} class="aurora-label">{@label}</span>
+        <textarea
           id={@id}
           name={@name}
-          class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
-          ]}
+          class={[@class || "aurora-input", @errors != [] && "border-red-500"]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
       </label>
@@ -271,18 +269,15 @@ defmodule AdminScaffoldWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="aurora-form-group">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="aurora-label">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-          class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
-          ]}
+          class={[@class || "aurora-input", @errors != [] && "border-red-500"]}
           {@rest}
         />
       </label>
@@ -307,41 +302,38 @@ defmodule AdminScaffoldWeb.CoreComponents do
       phx-remove={hide(@id)}
       class={["relative z-50", !@show && "hidden"]}
     >
-      <div id={"#{@id}-bg"} class="fixed inset-0 bg-zinc-50/90 transition-opacity" aria-hidden="true" />
+      <div id={"#{@id}-bg"} class="fixed inset-0 transition-opacity" style="background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);" aria-hidden="true" />
       <div
-        class="fixed inset-0 overflow-y-auto"
+        class="fixed inset-0 overflow-y-auto z-[101]"
         aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
         tabindex="0"
       >
-        <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-3xl p-4 sm:p-6 lg:p-8">
-            <.focus_wrap
-              id={"#{@id}-container"}
-              phx-window-keydown={JS.exec(@on_cancel, "phx-remove")}
-              phx-key="escape"
-              phx-click-away={JS.exec(@on_cancel, "phx-remove")}
-              class={[
-                "shadow-zinc-700/10 ring-zinc-700/10 relative rounded-2xl bg-white p-6 shadow-lg ring-1 transition-opacity",
-                !@show && "hidden"
-              ]}
-            >
-              <div class="absolute top-6 right-6">
-                <button
-                  phx-click={JS.exec(@on_cancel, "phx-remove")}
-                  type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
-                  aria-label={gettext("close")}
-                >
-                  <.icon name="hero-x-mark" class="size-5" />
-                </button>
-              </div>
-              
-              <div id={"#{@id}-content"}>{render_slot(@inner_block)}</div>
-            </.focus_wrap>
-          </div>
+        <div class="flex min-h-full items-center justify-center p-4">
+          <.focus_wrap
+            id={"#{@id}-container"}
+            phx-window-keydown={JS.exec(@on_cancel, "phx-remove")}
+            phx-key="escape"
+            phx-click-away={JS.exec(@on_cancel, "phx-remove")}
+            class={["w-full max-w-2xl transition-opacity", !@show && "hidden"]}
+            style="background: var(--color-bg-surface); border-radius: var(--radius-2xl); box-shadow: var(--shadow-2xl); padding: var(--spacing-xl);"
+          >
+            <div class="flex justify-end mb-2">
+              <button
+                phx-click={JS.exec(@on_cancel, "phx-remove")}
+                type="button"
+                style="color: var(--color-text-muted);"
+                class="p-1 rounded hover:opacity-70 transition-opacity"
+                aria-label={gettext("close")}
+              >
+                <.icon name="hero-x-mark" class="size-5" />
+              </button>
+            </div>
+
+            <div id={"#{@id}-content"}>{render_slot(@inner_block)}</div>
+          </.focus_wrap>
         </div>
       </div>
     </div>

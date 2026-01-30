@@ -41,7 +41,8 @@
       "mcp__chrome-devtools__fill",
       "mcp__chrome-devtools__wait_for",
       "Bash(pkill:*)",
-      "Bash(mix deps.get:*)"
+      "Bash(mix deps.get:*)",
+      "Bash(dir:*)"
     ]
   }
 }
