@@ -167,6 +167,76 @@ defmodule AdminScaffold.Accounts do
     end
   end
 
+  @doc """
+  批量删除用户。
+
+  ## Examples
+
+      iex> batch_delete_users([1, 2, 3])
+      {:ok, 3}
+
+  """
+  def batch_delete_users(user_ids, current_user \\ nil, metadata \\ %{}) do
+    users = Repo.all(from(u in User, where: u.id in ^user_ids))
+
+    Repo.transaction(fn ->
+      case Repo.delete_all(from(u in User, where: u.id in ^user_ids)) do
+        {count, _} when count > 0 ->
+          # Log each deletion
+          Enum.each(users, fn user ->
+            System.log_action(
+              current_user,
+              "delete",
+              "User",
+              user.id,
+              %{email: user.email},
+              metadata
+            )
+          end)
+
+          {:ok, count}
+
+        {0, _} ->
+          {:ok, 0}
+      end
+    end)
+  end
+
+  @doc """
+  批量更新用户状态。
+
+  ## Examples
+
+      iex> batch_update_user_status([1, 2, 3], "active")
+      {:ok, 3}
+
+  """
+  def batch_update_user_status(user_ids, status, current_user \\ nil, metadata \\ %{}) do
+    users = Repo.all(from(u in User, where: u.id in ^user_ids))
+
+    Repo.transaction(fn ->
+      case Repo.update_all(from(u in User, where: u.id in ^user_ids), set: [status: status]) do
+        {count, _} when count > 0 ->
+          # Log each update
+          Enum.each(users, fn user ->
+            System.log_action(
+              current_user,
+              "update",
+              "User",
+              user.id,
+              %{status: status, email: user.email},
+              metadata
+            )
+          end)
+
+          {:ok, count}
+
+        {0, _} ->
+          {:ok, 0}
+      end
+    end)
+  end
+
   ## User registration
 
   @doc """

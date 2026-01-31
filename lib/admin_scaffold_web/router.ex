@@ -17,6 +17,11 @@ defmodule AdminScaffoldWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # 权限验证 pipeline（用于需要权限检查的路由）
+  pipeline :require_permission do
+    plug AdminScaffoldWeb.Plugs.RoutePermission
+  end
+
   scope "/", AdminScaffoldWeb do
     pipe_through :browser
 
@@ -50,14 +55,20 @@ defmodule AdminScaffoldWeb.Router do
   scope "/", AdminScaffoldWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    # 公开路由（不需要特殊权限）
     live_session :require_authenticated_user,
       on_mount: [{AdminScaffoldWeb.UserAuth, :require_authenticated}] do
       live "/dashboard", DashboardLive.Index, :index
+      live "/users/settings", UserLive.Settings, :edit
+      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
+
+    # 需要权限验证的路由
+    live_session :require_authenticated_user_with_permission,
+      on_mount: [{AdminScaffoldWeb.UserAuth, :require_authenticated}] do
       live "/admin/users", UserLive.Index, :index
       live "/admin/users/:id", UserLive.Show, :show
       live "/admin/users/:id/edit", UserLive.Index, :edit
-      live "/users/settings", UserLive.Settings, :edit
-      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
 
       # 角色管理
       live "/admin/roles", RoleLive.Index, :index
@@ -76,6 +87,11 @@ defmodule AdminScaffoldWeb.Router do
 
       # 审计日志
       live "/admin/audit-logs", AuditLogLive.Index, :index
+
+      # 系统设置
+      live "/admin/settings", SettingLive.Index, :index
+      live "/admin/settings/new", SettingLive.Index, :new
+      live "/admin/settings/:id/edit", SettingLive.Index, :edit
 
       # 页面构建器示例
       live "/admin/page-builder/example", PageLive.Example, :index

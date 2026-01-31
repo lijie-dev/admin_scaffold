@@ -7,7 +7,107 @@ defmodule AdminScaffold.System do
   import Ecto.Query, warn: false
   alias AdminScaffold.Repo
 
-  alias AdminScaffold.System.AuditLog
+  alias AdminScaffold.System.{AuditLog, Setting}
+
+  ## Setting functions
+
+  @doc """
+  返回所有设置列表。
+
+  ## Examples
+
+      iex> list_settings()
+      [%Setting{}, ...]
+
+  """
+  def list_settings do
+    Repo.all(Setting)
+  end
+
+  @doc """
+  获取单个设置。
+
+  ## Examples
+
+      iex> get_setting!(123)
+      %Setting{}
+
+  """
+  def get_setting!(id) do
+    Repo.get!(Setting, id)
+  end
+
+  @doc """
+  获取设置值的便捷函数。
+
+  ## Examples
+
+      iex> get_setting_value("system.name")
+      "我的系统"
+
+  """
+  def get_setting_value(key, default \\ nil) do
+    case Repo.get_by(Setting, key: key) do
+      nil -> default
+      setting -> setting.value
+    end
+  end
+
+  @doc """
+  创建新设置。
+
+  ## Examples
+
+      iex> create_setting(%{key: "system.name", value: "我的系统"}, user_scope)
+      {:ok, %Setting{}}
+
+  """
+  def create_setting(attrs, user_scope) do
+    %Setting{}
+    |> Setting.changeset(attrs, user_scope)
+    |> Repo.insert()
+  end
+
+  @doc """
+  更新设置。
+
+  ## Examples
+
+      iex> update_setting(setting, %{value: "新值"}, user_scope)
+      {:ok, %Setting{}}
+
+  """
+  def update_setting(%Setting{} = setting, attrs, user_scope) do
+    setting
+    |> Setting.changeset(attrs, user_scope)
+    |> Repo.update()
+  end
+
+  @doc """
+  删除设置。
+
+  ## Examples
+
+      iex> delete_setting(setting)
+      {:ok, %Setting{}}
+
+  """
+  def delete_setting(%Setting{} = setting) do
+    Repo.delete(setting)
+  end
+
+  @doc """
+  返回设置 changeset。
+
+  ## Examples
+
+      iex> change_setting(setting)
+      %Ecto.Changeset{}
+
+  """
+  def change_setting(%Setting{} = setting, attrs \\ %{}) do
+    Setting.changeset(setting, attrs, %{user: %{id: nil}})
+  end
 
   ## Audit Log functions
 
