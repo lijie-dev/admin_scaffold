@@ -114,6 +114,37 @@ defmodule AdminScaffoldWeb.CoreComponents do
   end
 
   @doc """
+  Renders a label.
+  """
+  attr :for, :string, default: nil
+  attr :field, Phoenix.HTML.FormField, default: nil
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    ~H"""
+    <label for={@for || (@field && @field.id)} class="block text-sm font-medium text-gray-700 mb-1">
+      {render_slot(@inner_block)}
+    </label>
+    """
+  end
+
+  @doc """
+  Renders a file upload button for live uploads.
+  """
+  attr :upload, :any, required: true
+  attr :class, :string, default: ""
+  slot :inner_block, required: true
+
+  def live_img_upload(assigns) do
+    ~H"""
+    <label class={"cursor-pointer inline-flex items-center gap-2 #{@class}"}>
+      <.live_file_input upload={@upload} class="hidden" />
+      {render_slot(@inner_block)}
+    </label>
+    """
+  end
+
+  @doc """
   Renders an input with label and error messages.
 
   A `Phoenix.HTML.FormField` may be passed as argument,

@@ -7,7 +7,7 @@ defmodule AdminScaffold.System do
   import Ecto.Query, warn: false
   alias AdminScaffold.Repo
 
-  alias AdminScaffold.System.{AuditLog, Setting}
+  alias AdminScaffold.System.{AuditLog, Setting, Notification}
 
   ## Setting functions
 
@@ -247,5 +247,101 @@ defmodule AdminScaffold.System do
 
   defp maybe_limit(query, limit) do
     from(a in query, limit: ^limit)
+  end
+
+  ## Notification functions
+
+  @doc """
+  返回用户的通知列表。
+
+  ## Examples
+
+      iex> list_notifications(user_id)
+      [%Notification{}, ...]
+
+  """
+  def list_notifications(user_id, opts \\ []) do
+    query = from(n in Notification, where: n.user_id == ^user_id, order_by: [desc: n.inserted_at])
+
+    query
+    |> maybe_filter_read_status(opts[:read])
+    |> maybe_limit(opts[:limit])
+    |> preload(:user)
+    |> Repo.all()
+  end
+
+  @doc """
+  返回未读通知数量。
+  """
+  def unread_count(user_id) do
+    from(n in Notification,
+      where: n.user_id == ^user_id and n.read == false
+    )
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
+  创建通知。
+
+  ## Examples
+
+      iex> create_notification(user, "新消息", "您有一条新消息", "info")
+      {:ok, %Notification{}}
+
+  """
+  def create_notification(user, title, message, type, data \\ %{}) do
+    attrs = %{
+      user_id: user.id,
+      title: title,
+      message: message,
+      type: type,
+      data: data
+    }
+
+    %Notification{}
+    |> Notification.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  标记通知为已读。
+  """
+  def mark_as_read(notification_id) do
+    notification = Repo.get!(Notification, notification_id)
+
+    notification
+    |> Ecto.Changeset.change(%{read: true, read_at: DateTime.utc_now()})
+    |> Repo.update()
+  end
+
+  @doc """
+  标记所有通知为已读。
+  """
+  def mark_all_as_read(user_id) do
+    from(n in Notification, where: n.user_id == ^user_id)
+    |> Repo.update_all(set: [read: true, read_at: DateTime.utc_now()])
+  end
+
+  @doc """
+  删除通知。
+  """
+  def delete_notification(notification_id) do
+    notification = Repo.get!(Notification, notification_id)
+    Repo.delete(notification)
+  end
+
+  @doc """
+  删除所有通知。
+  """
+  def delete_all_notifications(user_id) do
+    from(n in Notification, where: n.user_id == ^user_id)
+    |> Repo.delete_all()
+  end
+
+  # Private helpers for notifications
+
+  defp maybe_filter_read_status(query, nil), do: query
+  defp maybe_filter_read_status(query, status) do
+    from(n in query, where: n.read == ^status)
   end
 end

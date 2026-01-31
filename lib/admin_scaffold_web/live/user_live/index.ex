@@ -3,7 +3,7 @@ defmodule AdminScaffoldWeb.UserLive.Index do
 
   alias AdminScaffold.Accounts
   alias AdminScaffoldWeb.Authorization
-  alias AdminScaffoldWeb.PermissionButton
+  import AdminScaffoldWeb.PermissionButton
 
   @impl true
   def mount(_params, _session, socket) do

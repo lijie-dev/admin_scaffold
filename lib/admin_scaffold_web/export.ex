@@ -5,6 +5,7 @@ defmodule AdminScaffoldWeb.Export do
   支持导出为 CSV、Excel 和 PDF 格式。
   """
 
+  import Ecto.Query
   require Logger
   alias AdminScaffold.Repo
   alias AdminScaffold.Accounts

@@ -4,6 +4,7 @@ defmodule AdminScaffoldWeb.Plugs.RoutePermission do
 
   检查当前用户是否具有访问特定路由的权限。
   """
+  use AdminScaffoldWeb, :controller
   import Plug.Conn
 
   def init(opts), do: opts

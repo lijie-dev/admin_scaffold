@@ -45,7 +45,7 @@ defmodule AdminScaffoldWeb.PermissionButton do
     """
   end
 
-  @doc """
+  @doc ~S"""
   渲染一个链接，只在用户有权限时显示。
 
   ## Examples

@@ -55,17 +55,14 @@ defmodule AdminScaffoldWeb.Router do
   scope "/", AdminScaffoldWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    # 公开路由（不需要特殊权限）
+    # 所有需要认证的路由放在同一个 live_session 中
     live_session :require_authenticated_user,
       on_mount: [{AdminScaffoldWeb.UserAuth, :require_authenticated}] do
       live "/dashboard", DashboardLive.Index, :index
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
-    end
 
-    # 需要权限验证的路由
-    live_session :require_authenticated_user_with_permission,
-      on_mount: [{AdminScaffoldWeb.UserAuth, :require_authenticated}] do
+      # 用户管理
       live "/admin/users", UserLive.Index, :index
       live "/admin/users/:id", UserLive.Show, :show
       live "/admin/users/:id/edit", UserLive.Index, :edit
@@ -93,9 +90,23 @@ defmodule AdminScaffoldWeb.Router do
       live "/admin/settings/new", SettingLive.Index, :new
       live "/admin/settings/:id/edit", SettingLive.Index, :edit
 
+      # 文件管理
+      live "/admin/files", FileUploadLive.Index, :index
+
+      # 数据统计
+      live "/admin/charts", ChartLive, :index
+
+      # 通知中心
+      live "/notifications", NotificationLive.Index, :index
+
       # 页面构建器示例
       live "/admin/page-builder/example", PageLive.Example, :index
     end
+
+    # 导出路由
+    get "/admin/export/users", ExportController, :users_csv
+    get "/admin/export/roles", ExportController, :roles_csv
+    get "/admin/export/audit-logs", ExportController, :audit_logs_csv
 
     post "/users/update-password", UserSessionController, :update_password
   end
